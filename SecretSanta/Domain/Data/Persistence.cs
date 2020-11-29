@@ -15,8 +15,11 @@ namespace SecretSanta.Domain.Data
             _dbContext = dbContext;
         }
 
-        public async Task<SecretSantaEvent[]> GetEventsFor(string telegramLogin)
+        public async Task<SecretSantaEvent[]> GetEventsFor(string? telegramLogin)
         {
+            if (string.IsNullOrWhiteSpace(telegramLogin))
+                return Array.Empty<SecretSantaEvent>();
+            
             var userMembership = await _dbContext.Memberships.Where(m => m.TelegramLogin == telegramLogin).ToArrayAsync();
 
             var eventUids = userMembership.Select(m => m.EventUid).ToArray();

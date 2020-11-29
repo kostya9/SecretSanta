@@ -33,7 +33,7 @@ namespace SecretSanta
             services.AddScoped(provider => provider.GetRequiredService<UserState>().Auth);
             services.AddScoped(provider => provider.GetRequiredService<UserState>().SantaEvents);
             services.AddScoped<Persistence>();
-            services.AddSingleton(_ => new BotWrapper(Configuration.GetValue<string>("DOTNET_BOT_KEY")));
+            services.AddSingleton(p => new BotWrapper(Configuration.GetValue<string>("DOTNET_BOT_KEY"), p.GetRequiredService<Persistence>()));
 
             services.AddHttpsRedirection(opt => { opt.RedirectStatusCode = 301; });
 
