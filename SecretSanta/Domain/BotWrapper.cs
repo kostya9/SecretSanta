@@ -24,7 +24,6 @@ namespace SecretSanta.Domain
             _botKey = botKey;
             _persistence = persistence;
             _bot = new TelegramBotClient(botKey);
-            StartReceivingMessages();
         }
 
         public void StartReceivingMessages()
@@ -98,8 +97,11 @@ namespace SecretSanta.Domain
 
         public void Dispose()
         {
-            _bot.StopReceiving();
-            _bot.OnMessage -= OnNewTelegramMessage;
+            if (_bot.IsReceiving)
+            {
+                _bot.StopReceiving();
+                _bot.OnMessage -= OnNewTelegramMessage;
+            }
         }
     }
 }

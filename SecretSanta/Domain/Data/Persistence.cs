@@ -20,12 +20,12 @@ namespace SecretSanta.Domain.Data
             if (string.IsNullOrWhiteSpace(telegramLogin))
                 return Array.Empty<SecretSantaEvent>();
             
-            var userMembership = await _dbContext.Memberships.Where(m => m.TelegramLogin == telegramLogin).ToArrayAsync();
+            var userMembership = await _dbContext.Memberships.AsNoTracking().Where(m => m.TelegramLogin == telegramLogin).ToArrayAsync();
 
             var eventUids = userMembership.Select(m => m.EventUid).ToArray();
-            var allEvents = await _dbContext.Events.Where(e => eventUids.Contains(e.Uid)).ToArrayAsync();
+            var allEvents = await _dbContext.Events.AsNoTracking().Where(e => eventUids.Contains(e.Uid)).ToArrayAsync();
 
-            var allEventMemberships = await _dbContext.Memberships.Where(m => eventUids.Contains(m.EventUid)).ToArrayAsync();
+            var allEventMemberships = await _dbContext.Memberships.AsNoTracking().Where(m => eventUids.Contains(m.EventUid)).ToArrayAsync();
             var membershipLookup = allEventMemberships.ToLookup(a => a.EventUid);
 
             List<SecretSantaEvent> events = new();
