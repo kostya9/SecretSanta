@@ -30,15 +30,6 @@
         <Exec Command="npm run build:$(Configuration)" WorkingDirectory="$(MSBuildThisFileDirectory)" />
     </Target>
 
-    <!-- If any source file in this dir or below has changed, perform a Webpack build -->
-    <Target Name="BuildStaticAssets"
-            DependsOnTargets="NpmInstall"
-            BeforeTargets="CoreBuild"
-            Inputs="@(StaticAssets)"
-            Outputs="$(MSBuildThisFileDirectory)..\wwwroot\$(StaticCSSPath)">
-        <Exec Command="npm run build:$(Configuration)" WorkingDirectory="$(MSBuildThisFileDirectory)" />
-    </Target>
-
     <!--Copy Images to wwwroot-->
     <Target Name="BuildImages"
              DependsOnTargets="NpmInstall"
@@ -46,7 +37,7 @@
              Inputs="@(StaticAssets)"
              Outputs="$(MSBuildThisFileDirectory)..\wwwroot\img\**">
         <ItemGroup>
-            <Images Include="$(MSBuildThisFileDirectory)img/**"/>
+            <Images Include="$(MSBuildThisFileDirectory)img\**"/>
         </ItemGroup>
         
         <Copy SourceFiles="@(Images)"
@@ -55,7 +46,7 @@
     </Target>
 
     <!--Copy Favicon to wwwroot-->
-    <Target Name="BuildImages"
+    <Target Name="BuildImagesFavicon"
             DependsOnTargets="NpmInstall"
             BeforeTargets="CoreBuild"
             Inputs="@(StaticAssets)"
