@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace SecretSanta.Domain
+namespace SecretSanta.Domain.Data
 {
     public class Persistence
     {

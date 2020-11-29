@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace SecretSanta.Domain
+namespace SecretSanta.Domain.Data
 {
     public class SqliteDbContext : DbContext
     {

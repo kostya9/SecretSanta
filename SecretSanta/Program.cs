@@ -2,7 +2,7 @@ using dotenv.net;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using SecretSanta.Domain;
+using SecretSanta.Domain.Data;
 
 namespace SecretSanta
 {

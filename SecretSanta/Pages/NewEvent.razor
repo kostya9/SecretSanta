@@ -1,5 +1,6 @@
 ﻿@page "/NewEvent"
 @using SecretSanta.Domain
+@using SecretSanta.Domain.Data
 @using SecretSanta.Domain.State
 
 @inject NavigationManager Navigation
@@ -97,7 +98,7 @@
             return;
         }
 
-        _members.Add(new SecretSantaMember(NewMemberName!, NewMemberLogin!.TrimStart('@')));
+        _members.Add(new SecretSantaMember(NewMemberName!.Trim(), NewMemberLogin!.Trim().TrimStart('@')));
 
         NewMemberName = null;
         NewMemberLogin = null;
@@ -109,8 +110,8 @@
         if (!CanSave)
             return;
 
-        _members.Add(new SecretSantaMember(LoggedInName, Auth.Login.Login));
-        var santaEvent = SecretSantaEvent.Create(EventName!, _members);
+        _members.Add(new SecretSantaMember(LoggedInName!.Trim(), Auth.Login.Login));
+        var santaEvent = SecretSantaEvent.Create(EventName!.Trim(), _members);
         SantaEvents.AddEvent(santaEvent);
         Navigation.NavigateTo("/");
         
