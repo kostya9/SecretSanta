@@ -16,8 +16,9 @@
             {
                 <CascadingValue Value="Auth.Login!">
                     <RouteView RouteData="@routeData" />
-                </CascadingValue>                
+                </CascadingValue>
                 <div><h2 class="text-xs mt-10">You are currently logged in as <i>@@@Auth.Login.Login</i>. <a class="text-blue-500 underline cursor-pointer" @onclick="LogOut">Log out</a> </h2></div>
+                <div><h2 class="text-xs">This app is open source. You can check the code <a class="text-blue-500 underline cursor-pointer" href="https://github.com/kostya9/SecretSanta" target="_blank">at GitHub</a> </h2></div>
                 <div><h2 class="text-xs text-blue-500 underline cursor-pointer"><NavLink href="/credits">Picture credits</NavLink></h2></div>
             }
         </div>
