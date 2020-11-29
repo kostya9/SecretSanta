@@ -54,4 +54,16 @@
               SkipUnchangedFiles="true" />
     </Target>
 
+    <!--Copy Favicon to wwwroot-->
+    <Target Name="BuildImages"
+            DependsOnTargets="NpmInstall"
+            BeforeTargets="CoreBuild"
+            Inputs="@(StaticAssets)"
+            Outputs="$(MSBuildThisFileDirectory)..\wwwroot\favicon\favicon.ico">
+        
+        <Copy SourceFiles="$(MSBuildThisFileDirectory)favicon\santa.ico"
+              DestinationFiles="$(MSBuildThisFileDirectory)..\wwwroot\favicon.ico"
+              SkipUnchangedFiles="true" />
+    </Target>
+
 </Project>

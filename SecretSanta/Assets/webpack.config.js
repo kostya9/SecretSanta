@@ -3,7 +3,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const FixStyleOnlyEntriesPlugin = require("webpack-fix-style-only-entries");
 
 module.exports = (env, args) => ({
-    devtool: args.mode === 'development' ? 'source-map' : 'none',
+    devtool: args.mode === 'development' ? 'source-map' : false,
     entry: './css/main.css',
     output: {
         filename: '[name].js',
