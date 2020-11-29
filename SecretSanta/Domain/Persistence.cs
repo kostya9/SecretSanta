@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +30,7 @@ namespace SecretSanta.Domain
             {
                 var members = membershipLookup[persistedSantaEvent.Uid].ToArray();
                 var mappedMembers = members.Select(m => new SecretSantaMember(m.Name, m.TelegramLogin)).ToArray();
-                var loginMapping = mappedMembers.ToDictionary(m => m.TelegramLogin);
+                var loginMapping = mappedMembers.ToDictionary(m => m.TelegramLogin, m => m, StringComparer.OrdinalIgnoreCase);
                 var opponentMapping = members.ToDictionary(m => loginMapping[m.TelegramLogin],
                     m => loginMapping[m.OpponentTelegramLogin]);
                 

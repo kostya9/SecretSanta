@@ -27,8 +27,11 @@ namespace SecretSanta.Domain
             Name = name;
         }
 
-        public SecretSantaMember? GetFor(string username)
+        public SecretSantaMember? GetFor(string? username)
         {
+            if (username == null)
+                return null;
+            
             return _mapping.GetValueOrDefault(username);
         }
 

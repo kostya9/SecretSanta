@@ -27,5 +27,11 @@ namespace SecretSanta.Domain.State
             _events.Remove(santaEvent);
             SantaEventsChanged?.Invoke(this, new EventArgs());
         }
+
+        public void Clear()
+        {
+            _events.Clear();
+            SantaEventsChanged?.Invoke(this, new EventArgs());
+        }
     }
 }

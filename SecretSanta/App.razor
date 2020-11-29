@@ -1,5 +1,7 @@
 @using SecretSanta.Domain
+@using SecretSanta.Domain.State
 @inject TelegramAuth Auth
+@inject UserSantaEvents SantaEvents
 @implements IDisposable
 
 <LayoutView Layout="@typeof(MainLayout)">
@@ -48,5 +50,6 @@
     private void LogOut()
     {
         Auth.Logout();
+        SantaEvents.Clear();
     }
 }

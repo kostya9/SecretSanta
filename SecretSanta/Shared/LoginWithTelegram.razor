@@ -58,25 +58,29 @@ else
         base.OnAfterRender(firstRender);
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         _telegramLoginInterop = new TelegramLoginInterop(Login);
-        Js.InvokeVoidAsync("setupDotnetRef", DotNetObjectReference.Create(_telegramLoginInterop), _jsUpdateLoginRefId);
-        
+        await Js.InvokeVoidAsync("setupDotnetRef", DotNetObjectReference.Create(_telegramLoginInterop), _jsUpdateLoginRefId);
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
         @if (Environment.IsDevelopment())
         {
             MockValue = "burningleg";
-            MockLogin();
+            await MockLogin();
         }
         
-        base.OnInitialized();
+        await base.OnInitializedAsync();
     }
 
-    private void Login(string id, string login)
+    private async Task Login(string id, string login)
     {
+        await UpdateEvents(login);
         Auth.UpdateLogin(new TelegramId(id), new TelegramLogin(login));
-
-        InvokeAsync(() => UpdateEvents(login));
     }
 
     async Task UpdateEvents(string login)
@@ -88,12 +92,12 @@ else
         }
     }
 
-    void MockLogin()
+    async Task MockLogin()
     {
         if (!string.IsNullOrWhiteSpace(MockValue))
         {
+            await UpdateEvents(MockValue);
             Auth.UpdateLogin(new TelegramId(MockValue), new TelegramLogin(MockValue));
-            InvokeAsync(() => UpdateEvents(MockValue));
         }
     }
 }

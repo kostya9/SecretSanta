@@ -1,21 +1,22 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.JSInterop;
 
 namespace SecretSanta.Interop
 {
     public class TelegramLoginInterop
     {
-        private readonly Action<string, string> _action;
+        private readonly Func<string, string, Task> _action;
 
-        public TelegramLoginInterop(Action<string, string> action)
+        public TelegramLoginInterop(Func<string, string, Task> action)
         {
             _action = action;
         }
         
         [JSInvokable("LoginWithTelegram")]
-        public void LoginWithTelegram(string id, string login)
+        public async Task LoginWithTelegram(string id, string login)
         {
-            _action.Invoke(id, login);
+            await _action.Invoke(id, login);
         }
     }
 }
