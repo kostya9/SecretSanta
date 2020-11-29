@@ -1,0 +1,77 @@
+﻿@page "/{Uid}/selected"
+
+@using SecretSanta.Domain.State
+@using SecretSanta.Domain
+@inject UserSantaEvents SantaEvents
+@inject NavigationManager Navigation
+@inject IJSRuntime Js
+
+<div class="text-2xl font-bold text-center">
+    @Name
+</div>
+
+<div class="space-y-5">
+    <div>
+        Click below to copy this link. Share this link with other members - they will see their opponents!
+    </div>
+
+    <div class="border-2 border-red-500 p-2 bg-red-300 cursor-pointer" @onclick="CopyToClipboard">
+        @OpponentUrl
+    </div>
+    @if (_copied)
+    {
+        <div class="text-sm text-red-500">Copied</div>
+    }
+
+    <Button OnClick="GoToOpponent">See your opponent</Button>
+</div>
+
+<div class="flex flex-wrap flex-1 p-3 justify-center">
+    @foreach (var (name, telegramLogin) in Members)
+    {
+        <div class="bg-red-50 rounded w-96 p-3 m-3">
+            <div>Name: @name</div>
+            <div>Telegram Username: @telegramLogin</div>
+        </div>
+    }
+</div>
+
+@code {
+
+    [Parameter]
+    public string Uid { get; set; }
+
+    private bool _copied;
+
+    private IEnumerable<SecretSantaMember> Members => Selected?.TelegramUsers ?? Array.Empty<SecretSantaMember>();
+
+    private SecretSantaEvent Selected { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        Selected = SantaEvents.Events.FirstOrDefault(e => e.Uid == Uid);
+        if (Selected == null)
+        {
+            Navigation.NavigateTo("/");
+        }
+        base.OnParametersSet();
+    }
+
+    private string RelativeOpponentUrl => $"/{Uid}/WhoAmISecretSantaFor";
+
+    private string OpponentUrl => Navigation.ToAbsoluteUri(RelativeOpponentUrl).ToString();
+
+    private string Name => Selected?.Name ?? string.Empty;
+
+    private async Task CopyToClipboard()
+    {
+        await Js.InvokeVoidAsync("navigator.clipboard.writeText", OpponentUrl);
+        _copied = true;
+    }
+
+    private void GoToOpponent()
+    {
+        Navigation.NavigateTo(RelativeOpponentUrl);
+    }
+
+}

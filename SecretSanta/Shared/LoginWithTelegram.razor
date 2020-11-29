@@ -1,0 +1,99 @@
+﻿@using Microsoft.Extensions.Hosting
+@using SecretSanta.Domain
+@using SecretSanta.Domain.State
+@using SecretSanta.Interop
+@inject IHostEnvironment Environment
+@inject IJSRuntime Js
+@inject TelegramAuth Auth
+@inject UserSantaEvents SantaEvents
+@inject Persistence Persistence
+
+@if (Environment.IsDevelopment())
+{
+    <h3>Mock login as</h3>
+    <input @bind="MockValue">
+    <button @onclick="MockLogin">Go</button>
+}
+else
+{
+    <div class="text-center">
+        <h3 class="text-2xl font-bold">Log In With Telegram</h3>
+    </div>
+    
+    <div class="flex justify-center m-5">
+        @if(_showLoginButton) 
+        {
+        <script id="login" suppress-error="BL9992" src="https://telegram.org/js/telegram-widget.js?14" data-telegram-login="secret_santa_presents_bot" data-size="large" data-onauth="onTelegramAuth(user)"></script>
+        <script suppress-error="BL9992" type="text/javascript">
+          window.onTelegramAuth = (user) => {
+          var ref = window.refs.updateTelegramLogin
+          ref.invokeMethodAsync('LoginWithTelegram', user.id.toString(), user.username);
+          var button = document.getElementById('telegram-login-secret_santa_presents_bot');
+          button.parentElement.removeChild(button);
+      }
+      </script>
+      }
+    </div>
+}
+
+
+
+
+@code {
+    private TelegramLoginInterop? _telegramLoginInterop;
+
+    string _jsUpdateLoginRefId = "updateTelegramLogin";
+    
+    string? MockValue { get; set; }
+
+    bool _showLoginButton;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _showLoginButton = true;
+            StateHasChanged();
+        }
+        base.OnAfterRender(firstRender);
+    }
+
+    protected override void OnInitialized()
+    {
+        _telegramLoginInterop = new TelegramLoginInterop(Login);
+        Js.InvokeVoidAsync("setupDotnetRef", DotNetObjectReference.Create(_telegramLoginInterop), _jsUpdateLoginRefId);
+        
+        @if (Environment.IsDevelopment())
+        {
+            MockValue = "burningleg";
+            MockLogin();
+        }
+        
+        base.OnInitialized();
+    }
+
+    private void Login(string id, string login)
+    {
+        Auth.UpdateLogin(new TelegramId(id), new TelegramLogin(login));
+
+        InvokeAsync(() => UpdateEvents(login));
+    }
+
+    async Task UpdateEvents(string login)
+    {
+        var events = await Persistence.GetEventsFor(login);
+        foreach (var secretSantaEvent in events)
+        {
+            SantaEvents.AddEvent(secretSantaEvent);
+        }
+    }
+
+    void MockLogin()
+    {
+        if (!string.IsNullOrWhiteSpace(MockValue))
+        {
+            Auth.UpdateLogin(new TelegramId(MockValue), new TelegramLogin(MockValue));
+            InvokeAsync(() => UpdateEvents(MockValue));
+        }
+    }
+}

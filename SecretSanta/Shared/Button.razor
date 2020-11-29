@@ -1,0 +1,19 @@
+﻿<button type="button" class="shadow-md bg-red-300 rounded px-5 disabled:bg-gray-300 disabled:text-red-400 @SizeClass" disabled="@Disabled" @onclick="OnClick">
+    @ChildContent
+</button>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnClick { get; set; }
+
+    [Parameter]
+    public ButtonSize Size { get; set; } = ButtonSize.Normal;
+
+    private string SizeClass => Size == ButtonSize.Large ? "w-96" : string.Empty;
+}

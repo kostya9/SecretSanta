@@ -1,0 +1,136 @@
+﻿@page "/NewEvent"
+@using SecretSanta.Domain
+@using SecretSanta.Domain.State
+
+@inject NavigationManager Navigation
+@inject UserSantaEvents SantaEvents
+@inject Persistence Persistence
+@inject TelegramAuth Auth
+
+<div class="text-center w-full">
+    <h3 class="text-2xl font-bold">New Santa Event</h3>
+</div>
+
+<div class="my-5">
+    <label>
+        How do you want to call this event?
+    </label>
+    <input type="text" class="p-1 box-border rounded outline-none w-48 block" @bind-value="EventName" @bind-value:event="oninput" placeholder="Event name"/>
+</div>
+
+<div class="my-5">
+    <label>
+        How do you want us to call you?
+    </label>
+    <input type="text" class="p-1 box-border rounded outline-none w-48 block" @bind-value="LoggedInName" @bind-value:event="oninput" placeholder="Your name"/>
+</div>
+
+<div class="flex flex-wrap flex-1 p-3 justify-center">
+    <div class="bg-red-50 rounded w-96 p-3 m-3">
+        <div class="font-bold">You</div>
+        <div>Name: @(LoggedInName ?? string.Empty)</div>
+        <div>Telegram Username: @Auth.Login.Login</div>
+    </div>
+    
+    @foreach (var member in _members)
+    {
+        <div class="bg-red-50 rounded w-96 p-3 m-3">
+            <div>Name: @member.Name</div>
+            <div>Telegram Username: @member.TelegramLogin</div>
+            <Button OnClick="() => RemoveMember(member)">Remove</Button>
+        </div>
+    }
+</div>
+
+<div class="space-y-5 bg-red-200 p-5 max-w-xs">
+    <h4 class="font-bold italic">New Member</h4>
+    
+    @if (_errorText != null)
+    {
+        <span class="text-red-800 font-bold">@_errorText</span>
+    }
+    
+    <div>
+        <label>
+            Name
+        </label>
+        <input type="text" class="p-1 box-border rounded outline-none block" @bind-value="NewMemberName" @bind-value:event="oninput"/>
+    </div>
+    <div>
+        <label>
+            Telegram Username
+        </label>
+        <input type="text" class="p-1 box-border rounded outline-none block" @bind-value="NewMemberLogin" @bind-value:event="oninput"/>
+    </div>
+    <Button OnClick="Add" Disabled="Disabled">
+        Add
+    </Button>
+</div>
+
+<div class="flex justify-center my-5">
+    <Button Size="ButtonSize.Large" OnClick="Save" Disabled="!CanSave">Save</Button>
+</div>
+
+@code {
+    private readonly List<SecretSantaMember> _members = new();
+    private string _errorText;
+
+    private void RemoveMember(SecretSantaMember member)
+    {
+        _members.Remove(member);
+    }
+
+    private void Add()
+    {
+        if (Disabled)
+            return;
+
+        if (_members.Any(m => m.Name.Equals(NewMemberName, StringComparison.InvariantCultureIgnoreCase)))
+        {
+            _errorText = "Member with such a name already exists.";
+            return;
+        }
+        
+        if (_members.Any(m => m.TelegramLogin.Equals(NewMemberLogin, StringComparison.InvariantCultureIgnoreCase)))
+        {
+            _errorText = "Member with such a login already exists.";
+            return;
+        }
+
+        _members.Add(new SecretSantaMember(NewMemberName!, NewMemberLogin!));
+
+        NewMemberName = null;
+        NewMemberLogin = null;
+        _errorText = null;
+    }
+    
+    private async Task Save()
+    {
+        if (!CanSave)
+            return;
+
+        _members.Add(new SecretSantaMember(LoggedInName, Auth.Login.Login));
+        var santaEvent = SecretSantaEvent.Create(EventName!, _members);
+        SantaEvents.AddEvent(santaEvent);
+        Navigation.NavigateTo("/");
+        
+        NewMemberName = null;
+        NewMemberLogin = null;
+        _members.Clear();
+        await Persistence.SaveEvent(santaEvent);
+    }
+    
+
+    bool Disabled => string.IsNullOrWhiteSpace(NewMemberName) || string.IsNullOrWhiteSpace(NewMemberLogin);
+
+    bool CanSave => _members.Count >= 1 && !string.IsNullOrWhiteSpace(EventName) && !string.IsNullOrWhiteSpace(LoggedInName);
+
+    public string? NewMemberName { get; set; }
+
+    public string? NewMemberLogin { get; set; }
+
+    public string? EventName { get; set; }
+    
+    public string? LoggedInName { get; set; }
+
+}
