@@ -29,13 +29,11 @@
 </div>
 
 <script src="_framework/blazor.server.js"></script>
-<environment include="Development">
-    <script>
+<script>
         Blazor.defaultReconnectionHandler._reconnectCallback = function (d) {
             document.location.reload();
         }
     </script>
-</environment>
 
 <script>
     window.refs = {};
