@@ -20,8 +20,11 @@ namespace SecretSanta
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IHostEnvironment _hostEnvironment;
+
+        public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
         {
+            _hostEnvironment = hostEnvironment;
             Configuration = configuration;
         }
 
@@ -41,11 +44,14 @@ namespace SecretSanta
 
             services.AddHttpsRedirection(opt => { opt.RedirectStatusCode = 301; });
 
-            var temp = Path.GetTempPath();
+            var rootFolder =
+                _hostEnvironment.IsDevelopment() 
+                ? Path.GetTempPath()
+                : Configuration.GetValue<string>("DOTNET_SQLITE_DB_PATH");
             var subDirectory = "SecretSanta";
             var fileName = "secretSanta.db";
-            var fullPath = Path.Combine(temp, subDirectory, fileName);
-            Directory.CreateDirectory(Path.Combine(temp, subDirectory));
+            var fullPath = Path.Combine(rootFolder, subDirectory, fileName);
+            Directory.CreateDirectory(Path.Combine(rootFolder, subDirectory));
             services.AddDbContext<SqliteDbContext>(opt => opt.UseSqlite($"Data Source={fullPath};"));
         }
 
