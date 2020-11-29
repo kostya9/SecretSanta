@@ -1,12 +1,15 @@
 ﻿@using Microsoft.Extensions.Hosting
+@using Newtonsoft.Json.Linq
 @using SecretSanta.Domain
 @using SecretSanta.Domain.State
 @using SecretSanta.Interop
+@using System.Text.Json
 @inject IHostEnvironment Environment
 @inject IJSRuntime Js
 @inject TelegramAuth Auth
 @inject UserSantaEvents SantaEvents
 @inject Persistence Persistence
+@inject BotWrapper BotWrapper
 
 @if (Environment.IsDevelopment())
 {
@@ -27,7 +30,7 @@ else
         <script suppress-error="BL9992" type="text/javascript">
           window.onTelegramAuth = (user) => {
           var ref = window.refs.updateTelegramLogin
-          ref.invokeMethodAsync('LoginWithTelegram', user.id.toString(), user.username);
+          ref.invokeMethodAsync('LoginWithTelegram', user);
           var button = document.getElementById('telegram-login-secret_santa_presents_bot');
           button.parentElement.removeChild(button);
       }
@@ -68,7 +71,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        @if (Environment.IsDevelopment())
+        if (Environment.IsDevelopment())
         {
             MockValue = "burningleg";
             await MockLogin();
@@ -77,8 +80,17 @@ else
         await base.OnInitializedAsync();
     }
 
-    private async Task Login(string id, string login)
+    private async Task Login(JsonElement receivedTelegramInfo)
     {
+        var isValid = BotWrapper.IsValidPayload(receivedTelegramInfo);
+        if (!isValid)
+        {
+            await Js.InvokeVoidAsync("alert", "Telegram payload is not valid");
+            return;
+        }
+
+        var id = receivedTelegramInfo.GetProperty("id").GetInt64();
+        var login = receivedTelegramInfo.GetProperty("username").GetString();
         await UpdateEvents(login);
         Auth.UpdateLogin(new TelegramId(id), new TelegramLogin(login));
     }
@@ -94,10 +106,10 @@ else
 
     async Task MockLogin()
     {
-        if (!string.IsNullOrWhiteSpace(MockValue))
+        if (Environment.IsDevelopment() && !string.IsNullOrWhiteSpace(MockValue))
         {
             await UpdateEvents(MockValue);
-            Auth.UpdateLogin(new TelegramId(MockValue), new TelegramLogin(MockValue));
+            Auth.UpdateLogin(new TelegramId(1), new TelegramLogin(MockValue));
         }
     }
 }

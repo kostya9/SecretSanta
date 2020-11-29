@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.JSInterop;
 
@@ -6,17 +7,17 @@ namespace SecretSanta.Interop
 {
     public class TelegramLoginInterop
     {
-        private readonly Func<string, string, Task> _action;
+        private readonly Func<JsonElement, Task> _action;
 
-        public TelegramLoginInterop(Func<string, string, Task> action)
+        public TelegramLoginInterop(Func<JsonElement, Task> action)
         {
             _action = action;
         }
         
         [JSInvokable("LoginWithTelegram")]
-        public async Task LoginWithTelegram(string id, string login)
+        public async Task LoginWithTelegram(JsonDocument receivedTelegramInfo)
         {
-            await _action.Invoke(id, login);
+            await _action.Invoke(receivedTelegramInfo.RootElement);
         }
     }
 }

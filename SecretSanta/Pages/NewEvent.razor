@@ -97,7 +97,7 @@
             return;
         }
 
-        _members.Add(new SecretSantaMember(NewMemberName!, NewMemberLogin!));
+        _members.Add(new SecretSantaMember(NewMemberName!, NewMemberLogin!.TrimStart('@')));
 
         NewMemberName = null;
         NewMemberLogin = null;

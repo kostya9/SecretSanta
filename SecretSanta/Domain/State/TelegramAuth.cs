@@ -4,7 +4,7 @@ namespace SecretSanta.Domain
 {
     public record TelegramLogin(string Login);
     
-    public record TelegramId(string Id);
+    public record TelegramId(long Id);
     
     public class TelegramAuth
     {

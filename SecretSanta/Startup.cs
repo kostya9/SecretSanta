@@ -1,4 +1,9 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,11 +39,8 @@ namespace SecretSanta
             services.AddScoped<Persistence>();
             services.AddSingleton(_ => new BotWrapper(Configuration.GetValue<string>("DOTNET_BOT_KEY")));
 
-            services.AddHttpsRedirection(opt =>
-            {
-                opt.RedirectStatusCode = 301;
-            });
-            
+            services.AddHttpsRedirection(opt => { opt.RedirectStatusCode = 301; });
+
             var temp = Path.GetTempPath();
             var subDirectory = "SecretSanta";
             var fileName = "secretSanta.db";
@@ -77,9 +79,11 @@ namespace SecretSanta
     public class BotWrapper
     {
         private readonly TelegramBotClient _bot;
+        private readonly string _botKey;
 
         public BotWrapper(string botKey)
         {
+            _botKey = botKey;
             _bot = new TelegramBotClient(botKey);
         }
 
@@ -88,6 +92,33 @@ namespace SecretSanta
             var chat = await _bot.GetChatAsync(new ChatId(login));
 
             return chat != null;
+        }
+
+        public bool IsValidPayload(JsonElement receivedTelegramInfo)
+        {
+            List<string> fields = new();
+
+            foreach (var prop in receivedTelegramInfo.EnumerateObject())
+            {
+                if (prop.Name != "hash")
+                {
+                    fields.Add($"{prop.Name}={prop.Value}");
+                }
+            }
+
+            fields.Sort();
+
+            var hashedKey = SHA256.HashData(Encoding.UTF8.GetBytes(_botKey));
+            var hashAlgorithm = new HMACSHA256(hashedKey);
+
+            var joinedData = string.Join("\n", fields);
+            var dataBytes = Encoding.UTF8.GetBytes(joinedData);
+            var hashedFields = hashAlgorithm.ComputeHash(dataBytes);
+            var hexData = BitConverter.ToString(hashedFields).Replace("-", string.Empty).ToLower();
+
+            var receivedHash = receivedTelegramInfo.GetProperty("hash").GetString();
+
+            return receivedHash == hexData;
         }
     }
 }
