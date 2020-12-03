@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using SecretSanta.Domain.Data;
 using Telegram.Bot;
 using Telegram.Bot.Args;
@@ -18,11 +19,13 @@ namespace SecretSanta.Domain
         private TelegramBotClient _bot;
         private readonly string _botKey;
         private readonly Persistence _persistence;
+        private readonly ILogger<BotWrapper> _log;
 
-        public BotWrapper(string botKey, Persistence persistence)
+        public BotWrapper(string botKey, Persistence persistence, ILogger<BotWrapper> log)
         {
             _botKey = botKey;
             _persistence = persistence;
+            _log = log;
             _bot = new TelegramBotClient(botKey);
         }
 
@@ -57,7 +60,13 @@ namespace SecretSanta.Domain
                         $"For event '{santaEvent.Name}', buy a present for {opponent.Name} (@{opponent.TelegramLogin})!");
                 }
 
+                if (events.Length == 0)
+                {
+                    sb.AppendLine("Sorry, I do not know any events for you.");
+                }
+                
                 _bot.SendTextMessageAsync(chatId, sb.ToString()).GetAwaiter().GetResult();
+                _log.LogInformation("Sent a message to @{username}", args.Message.Chat.Username);
             }
         }
 
