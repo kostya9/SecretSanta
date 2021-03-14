@@ -92,11 +92,11 @@ else
 
         var id = receivedTelegramInfo.GetProperty("id").GetInt64();
         var login = receivedTelegramInfo.GetProperty("username").GetString();
-        await UpdateEvents(login);
+        await LoadEvents(login);
         Auth.UpdateLogin(new TelegramId(id), new TelegramLogin(login));
     }
 
-    async Task UpdateEvents(string login)
+    async Task LoadEvents(string login)
     {
         var events = await Persistence.GetEventsFor(login);
         foreach (var secretSantaEvent in events)
@@ -109,7 +109,7 @@ else
     {
         if (Environment.IsDevelopment() && !string.IsNullOrWhiteSpace(MockValue))
         {
-            await UpdateEvents(MockValue);
+            await LoadEvents(MockValue);
             Auth.UpdateLogin(new TelegramId(1), new TelegramLogin(MockValue));
         }
     }
