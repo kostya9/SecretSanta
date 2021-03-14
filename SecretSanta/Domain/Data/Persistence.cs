@@ -53,7 +53,7 @@ namespace SecretSanta.Domain.Data
                 Uid = santaEvent.Uid
             });
 
-            var mappings = santaEvent.LoginMappings;
+            var opponents = santaEvent.Opponents;
             foreach (var member in santaEvent.TelegramUsers)
             {
                 await _dbContext.Memberships.AddAsync(new SqliteDbContext.PersistedSantaEventMembership()
@@ -61,7 +61,7 @@ namespace SecretSanta.Domain.Data
                     Name = member.Name,
                     EventUid = santaEvent.Uid,
                     TelegramLogin = member.TelegramLogin,
-                    OpponentTelegramLogin = mappings[member.TelegramLogin]
+                    OpponentTelegramLogin = opponents[member.TelegramLogin]
                 });
             }
 

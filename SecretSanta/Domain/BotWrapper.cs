@@ -55,7 +55,7 @@ namespace SecretSanta.Domain
 
                 foreach (var santaEvent in events)
                 {
-                    var opponent = santaEvent.GetFor(args.Message.From.Username);
+                    var opponent = santaEvent.GetOpponentFor(args.Message.From.Username);
                     sb.AppendLine(
                         $"For event '{santaEvent.Name}', buy a present for {opponent.Name} (@{opponent.TelegramLogin})!");
                 }

@@ -9,30 +9,32 @@ namespace SecretSanta.Domain
     public class SecretSantaEvent
     {
         private readonly SecretSantaMember[] _users;
-        private readonly Dictionary<string, SecretSantaMember> _mapping;
+        private readonly Dictionary<string, SecretSantaMember> _opponents;
 
         public IEnumerable<SecretSantaMember> TelegramUsers => _users.ToArray();
 
-        public Dictionary<string, string> LoginMappings =>
-            _mapping.ToDictionary(m => m.Key, m => m.Value.TelegramLogin);
+        public IReadOnlyDictionary<string, string> Opponents =>
+            _opponents.ToDictionary(m => m.Key, m => m.Value.TelegramLogin);
 
         public string Uid { get; }
         public string Name { get; }
 
-        public SecretSantaEvent(string uid, string name, SecretSantaMember[] members, Dictionary<SecretSantaMember, SecretSantaMember> mapping)
+        public SecretSantaEvent(string uid, string name, SecretSantaMember[] members,
+            Dictionary<SecretSantaMember, SecretSantaMember> mapping)
         {
             _users = members;
-            _mapping = mapping.ToDictionary(m => m.Key.TelegramLogin, m => m.Value, StringComparer.OrdinalIgnoreCase);
+            _opponents =
+                mapping.ToDictionary(m => m.Key.TelegramLogin, m => m.Value, StringComparer.OrdinalIgnoreCase);
             Uid = uid;
             Name = name;
         }
 
-        public SecretSantaMember? GetFor(string? username)
+        public SecretSantaMember? GetOpponentFor(string? username)
         {
             if (username == null)
                 return null;
-            
-            return _mapping.GetValueOrDefault(username);
+
+            return _opponents.GetValueOrDefault(username);
         }
 
         public static SecretSantaEvent Create(string name, IList<SecretSantaMember> members)
@@ -57,7 +59,7 @@ namespace SecretSanta.Domain
                 {
                     var mapping = candidateToCandidateNumber.Select((i, j) => (i, j))
                         .ToDictionary(pair => members[pair.i], pair => members[pair.j]);
-                    return new(Guid.NewGuid().ToString(), name, members.ToArray(), mapping);                    
+                    return new(Guid.NewGuid().ToString(), name, members.ToArray(), mapping);
                 }
             }
         }
