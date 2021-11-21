@@ -40,7 +40,7 @@
     Blazor.start({
         reconnectionHandler: {
           onConnectionDown: (options, error) => console.error(error),
-          onConnectionUp: () => document.location.reload();
+          onConnectionUp: () => document.location.reload()
         }
       });
 </script>
