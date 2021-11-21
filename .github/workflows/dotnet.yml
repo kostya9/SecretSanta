@@ -11,7 +11,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: site
+        working-directory: SecretSanta
     env:
       DEPLOY_SECRET: ${{ secrets.DEPLOY_SECRET }}
     steps:
