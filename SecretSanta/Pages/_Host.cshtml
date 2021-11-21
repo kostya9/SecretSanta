@@ -37,12 +37,20 @@
 
 <script autostart="false" src="_framework/blazor.server.js"></script>
 <script>
-    Blazor.start({
-        reconnectionHandler: {
-          onConnectionDown: (options, error) => console.error(error),
-          onConnectionUp: () => document.location.reload()
-        }
-      });
+    Blazor.start().then(() => {
+        Object.defineProperty(Blazor.defaultReconnectionHandler, '_reconnectionDisplay', {
+            get() {
+                return this.__reconnectionDisplay;
+            },
+            set(value) {
+                this.__reconnectionDisplay = {
+                    show: () => value.show(),
+                    update: (d) => value.update(d),
+                    rejected: (d) => document.location.reload()
+                }
+            }
+        });
+    });
 </script>
 
 
