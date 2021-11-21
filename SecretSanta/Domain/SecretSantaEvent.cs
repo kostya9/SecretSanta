@@ -1,10 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 namespace SecretSanta.Domain
 {
     public record SecretSantaMember(string Name, string TelegramLogin);
+
+    public record MaxPrice(string Value, string Currency);
+
+    public record Metadata(JsonDocument Content)
+    {
+        public MaxPrice? Price => Content.RootElement.TryGetProperty(MaxPriceKey, out var marPrice)
+            ? marPrice.Deserialize<MaxPrice>()
+            : null;
+
+        public string MaxPriceKey => "maxPrice";
+    };
 
     public class SecretSantaEvent
     {
@@ -17,16 +29,20 @@ namespace SecretSanta.Domain
             _opponents.ToDictionary(m => m.Key, m => m.Value.TelegramLogin);
 
         public string Uid { get; }
+
         public string Name { get; }
 
+        public Metadata Metadata { get; }
+
         public SecretSantaEvent(string uid, string name, SecretSantaMember[] members,
-            Dictionary<SecretSantaMember, SecretSantaMember> mapping)
+            Dictionary<SecretSantaMember, SecretSantaMember> mapping, Metadata metadata)
         {
             _users = members;
             _opponents =
                 mapping.ToDictionary(m => m.Key.TelegramLogin, m => m.Value, StringComparer.OrdinalIgnoreCase);
             Uid = uid;
             Name = name;
+            Metadata = metadata;
         }
 
         public SecretSantaMember? GetOpponentFor(string? username)
@@ -37,7 +53,7 @@ namespace SecretSanta.Domain
             return _opponents.GetValueOrDefault(username);
         }
 
-        public static SecretSantaEvent Create(string name, IList<SecretSantaMember> members)
+        public static SecretSantaEvent Create(string name, IList<SecretSantaMember> members, Metadata metadata)
         {
             Random r = new();
             while (true)
@@ -59,7 +75,7 @@ namespace SecretSanta.Domain
                 {
                     var mapping = candidateToCandidateNumber.Select((i, j) => (i, j))
                         .ToDictionary(pair => members[pair.i], pair => members[pair.j]);
-                    return new(Guid.NewGuid().ToString(), name, members.ToArray(), mapping);
+                    return new(Guid.NewGuid().ToString(), name, members.ToArray(), mapping, metadata);
                 }
             }
         }

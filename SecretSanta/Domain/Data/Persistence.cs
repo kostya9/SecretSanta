@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,9 +39,14 @@ namespace SecretSanta.Domain.Data
                 var loginMapping = mappedMembers.ToDictionary(m => m.TelegramLogin, m => m, StringComparer.OrdinalIgnoreCase);
                 var opponentMapping = members.ToDictionary(m => loginMapping[m.TelegramLogin],
                     m => loginMapping[m.OpponentTelegramLogin]);
+                var metadata = persistedSantaEvent.Metadata;
                 
 
-                var santaEvent = new SecretSantaEvent(persistedSantaEvent.Uid, persistedSantaEvent.Name, mappedMembers, opponentMapping);
+                var santaEvent = new SecretSantaEvent(persistedSantaEvent.Uid, 
+                    persistedSantaEvent.Name, 
+                    mappedMembers, 
+                    opponentMapping,
+                    new(metadata));
                 events.Add(santaEvent);
             }
 

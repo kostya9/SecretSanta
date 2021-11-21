@@ -111,7 +111,7 @@
             return;
 
         _members.Add(new SecretSantaMember(LoggedInName!.Trim(), Auth.Login.Login));
-        var santaEvent = SecretSantaEvent.Create(EventName!.Trim(), _members);
+        var santaEvent = SecretSantaEvent.Create(EventName!.Trim(), _members, null);
         SantaEvents.AddEvent(santaEvent);
         Navigation.NavigateTo("/");
         

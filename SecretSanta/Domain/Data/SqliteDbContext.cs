@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace SecretSanta.Domain.Data
 {
@@ -20,7 +21,11 @@ namespace SecretSanta.Domain.Data
             eventTable.HasKey(e => e.Uid);
             eventTable.Property(p => p.Name).HasColumnName("name");
             eventTable.Property(p => p.Uid).HasColumnName("uid");
-            
+            eventTable.Property(p => p.Metadata).HasColumnName("metadata")
+                .HasConversion(
+                    m => m.ToString(),
+                    s => JsonDocument.Parse(s ?? "{}", new JsonDocumentOptions()));
+
             var membershipTable = modelBuilder.Entity<PersistedSantaEventMembership>().ToTable("santa_event_membership");
             membershipTable.HasKey(m => new {m.EventUid, m.TelegramLogin});
             membershipTable.HasIndex(m => new {m.TelegramLogin, m.EventUid});
@@ -48,6 +53,8 @@ namespace SecretSanta.Domain.Data
             public string Uid { get; set; }
 
             public string Name { get; set; }
+
+            public JsonDocument Metadata { get; set; }
         }
     }
 }

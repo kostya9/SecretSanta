@@ -1,5 +1,6 @@
 using dotenv.net;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SecretSanta.Domain;
@@ -17,7 +18,7 @@ namespace SecretSanta
             using (var scope = host.Services.CreateScope())
             {
                 var ctx = scope.ServiceProvider.GetRequiredService<SqliteDbContext>();
-                ctx.Database.EnsureCreated();
+                ctx.Database.Migrate();
             }
 
             using var bot = host.Services.GetRequiredService<BotWrapper>();
