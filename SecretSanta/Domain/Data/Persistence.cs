@@ -8,24 +8,26 @@ namespace SecretSanta.Domain.Data
 {
     public class Persistence
     {
-        private readonly SqliteDbContext _dbContext;
+        private readonly IDbContextFactory<SqliteDbContext> _dbContextFactory;
 
-        public Persistence(SqliteDbContext dbContext)
+        public Persistence(IDbContextFactory<SqliteDbContext> dbContextFactory)
         {
-            _dbContext = dbContext;
+            _dbContextFactory = dbContextFactory;
         }
 
         public async Task<SecretSantaEvent[]> GetEventsFor(string? telegramLogin)
         {
             if (string.IsNullOrWhiteSpace(telegramLogin))
                 return Array.Empty<SecretSantaEvent>();
-            
-            var userMembership = await _dbContext.Memberships.AsNoTracking().Where(m => m.TelegramLogin == telegramLogin).ToArrayAsync();
+
+            await using var dbContext = _dbContextFactory.CreateDbContext();
+
+            var userMembership = await dbContext.Memberships.AsNoTracking().Where(m => m.TelegramLogin == telegramLogin).ToArrayAsync();
 
             var eventUids = userMembership.Select(m => m.EventUid).ToArray();
-            var allEvents = await _dbContext.Events.AsNoTracking().Where(e => eventUids.Contains(e.Uid)).ToArrayAsync();
+            var allEvents = await dbContext.Events.AsNoTracking().Where(e => eventUids.Contains(e.Uid)).ToArrayAsync();
 
-            var allEventMemberships = await _dbContext.Memberships.AsNoTracking().Where(m => eventUids.Contains(m.EventUid)).ToArrayAsync();
+            var allEventMemberships = await dbContext.Memberships.AsNoTracking().Where(m => eventUids.Contains(m.EventUid)).ToArrayAsync();
             var membershipLookup = allEventMemberships.ToLookup(a => a.EventUid);
 
             List<SecretSantaEvent> events = new();
@@ -47,7 +49,9 @@ namespace SecretSanta.Domain.Data
         
         public async Task SaveEvent(SecretSantaEvent santaEvent)
         {
-            await _dbContext.Events.AddAsync(new SqliteDbContext.PersistedSantaEvent()
+            await using var dbContext = _dbContextFactory.CreateDbContext();
+
+            await dbContext.Events.AddAsync(new SqliteDbContext.PersistedSantaEvent()
             {
                 Name = santaEvent.Name,
                 Uid = santaEvent.Uid
@@ -56,7 +60,7 @@ namespace SecretSanta.Domain.Data
             var opponents = santaEvent.Opponents;
             foreach (var member in santaEvent.TelegramUsers)
             {
-                await _dbContext.Memberships.AddAsync(new SqliteDbContext.PersistedSantaEventMembership()
+                await dbContext.Memberships.AddAsync(new SqliteDbContext.PersistedSantaEventMembership()
                 {
                     Name = member.Name,
                     EventUid = santaEvent.Uid,
@@ -65,7 +69,7 @@ namespace SecretSanta.Domain.Data
                 });
             }
 
-            await _dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
         }
     }
 }

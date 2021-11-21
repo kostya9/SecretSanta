@@ -11,7 +11,7 @@ namespace SecretSanta
     {
         public static void Main(string[] args)
         {
-            DotEnv.Config();
+            DotEnv.Load();
             var host = CreateHostBuilder(args).Build();
 
             using (var scope = host.Services.CreateScope())

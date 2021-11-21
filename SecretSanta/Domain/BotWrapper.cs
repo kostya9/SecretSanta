@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SecretSanta.Domain.Data;
 using Telegram.Bot;
-using Telegram.Bot.Args;
+using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -17,6 +17,7 @@ namespace SecretSanta.Domain
     public class BotWrapper : IDisposable
     {
         private TelegramBotClient _bot;
+        private readonly CancellationTokenSource _stopCts;
         private readonly string _botKey;
         private readonly Persistence _persistence;
         private readonly ILogger<BotWrapper> _log;
@@ -27,35 +28,64 @@ namespace SecretSanta.Domain
             _persistence = persistence;
             _log = log;
             _bot = new TelegramBotClient(botKey);
+            _stopCts = new CancellationTokenSource();
         }
 
         public void StartReceivingMessages()
         {
-            if(_bot.IsReceiving)
-                return;
-            
-            _bot.OnMessage += OnNewTelegramMessage;
-            _bot.StartReceiving(new[] {UpdateType.Message});
+            var updateReceiver = new QueuedUpdateReceiver(_bot, new ReceiverOptions()
+            {
+                AllowedUpdates = new[] { UpdateType.Message }
+            });
+
+            Task.Run(async () =>
+            {
+                await foreach (var message in updateReceiver.WithCancellation(_stopCts.Token))
+                {
+                    OnNewTelegramMessage(message);
+                }
+            }, _stopCts.Token);
         }
 
-        private void OnNewTelegramMessage(object sender, MessageEventArgs args)
+        private void OnNewTelegramMessage(Update update)
         {
-            var chatId = new ChatId(args.Message.Chat.Id);
-            if (args.Message.Text == "/start")
+            var message = update.Message;
+
+            if (message is null)
+            {
+                _log.LogWarning("Message is null for @{update}", update);
+                return;
+            }
+
+            var chatId = new ChatId(message.Chat.Id);
+            if (message.Text == "/start")
             {
                 _bot.SendTextMessageAsync(chatId,
                     "Write /whoamisantafor to find who to buy presents for!").GetAwaiter().GetResult();
             }
 
-            if (args.Message.Text == "/whoamisantafor")
+            if (message.Text == "/whoamisantafor")
             {
-                var events = _persistence.GetEventsFor(args.Message.From.Username).GetAwaiter().GetResult();
+                if(message.From is null)
+                {
+                    _log.LogWarning("From is null for @{update}", update);
+                    return;
+                }
+
+                var events = _persistence.GetEventsFor(message.From.Username).GetAwaiter().GetResult();
 
                 var sb = new StringBuilder();
 
                 foreach (var santaEvent in events)
                 {
-                    var opponent = santaEvent.GetOpponentFor(args.Message.From.Username);
+                    var opponent = santaEvent.GetOpponentFor(message.From.Username);
+
+                    if (opponent is null)
+                    {
+                        _log.LogWarning("opponent is null for @{update}", update);
+                        return;
+                    }
+
                     sb.AppendLine(
                         $"For event '{santaEvent.Name}', buy a present for {opponent.Name} (@{opponent.TelegramLogin})!");
                 }
@@ -66,7 +96,7 @@ namespace SecretSanta.Domain
                 }
                 
                 _bot.SendTextMessageAsync(chatId, sb.ToString()).GetAwaiter().GetResult();
-                _log.LogInformation("Sent a message to @{username}", args.Message.Chat.Username);
+                _log.LogInformation("Sent a message to @{username}", message.Chat.Username);
             }
         }
 
@@ -106,10 +136,9 @@ namespace SecretSanta.Domain
 
         public void Dispose()
         {
-            if (_bot.IsReceiving)
+            if (!_stopCts.IsCancellationRequested)
             {
-                _bot.StopReceiving();
-                _bot.OnMessage -= OnNewTelegramMessage;
+                _stopCts.Cancel();
             }
         }
     }

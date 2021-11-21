@@ -33,7 +33,7 @@ namespace SecretSanta
             services.AddScoped<UserState>();
             services.AddScoped(provider => provider.GetRequiredService<UserState>().Auth);
             services.AddScoped(provider => provider.GetRequiredService<UserState>().SantaEvents);
-            services.AddScoped<Persistence>();
+            services.AddSingleton<Persistence>();
             services.AddSingleton(p => new BotWrapper(Configuration.GetValue<string>("DOTNET_BOT_KEY"),
                 p.GetRequiredService<Persistence>(), p.GetRequiredService<ILogger<BotWrapper>>()));
 
@@ -47,7 +47,7 @@ namespace SecretSanta
             var fileName = "secretSanta.db";
             var fullPath = Path.Combine(rootFolder, subDirectory, fileName);
             Directory.CreateDirectory(Path.Combine(rootFolder, subDirectory));
-            services.AddDbContext<SqliteDbContext>(opt => opt.UseSqlite($"Data Source={fullPath};"));
+            services.AddDbContextFactory<SqliteDbContext>(opt => opt.UseSqlite($"Data Source={fullPath};"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

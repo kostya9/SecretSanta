@@ -7,3 +7,5 @@ _ReSharper.Caches
 node_modules
 wwwroot
 Build
+.vs
+*.user

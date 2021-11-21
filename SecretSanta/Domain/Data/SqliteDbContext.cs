@@ -4,9 +4,9 @@ namespace SecretSanta.Domain.Data
 {
     public class SqliteDbContext : DbContext
     {
-        public DbSet<PersistedSantaEventMembership> Memberships { get; set; }
-        
-        public DbSet<PersistedSantaEvent> Events { get; set; }
+        public DbSet<PersistedSantaEventMembership> Memberships { get; set; } = null!;
+
+        public DbSet<PersistedSantaEvent> Events { get; set; } = null!;
 
         public SqliteDbContext(DbContextOptions<SqliteDbContext> options) : base(options)
         {
