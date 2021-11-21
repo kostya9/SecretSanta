@@ -28,18 +28,21 @@
     <a class="dismiss">🗙</a>
 </div>
 
-<script src="_framework/blazor.server.js"></script>
-<script>
-        Blazor.defaultReconnectionHandler._reconnectCallback = function (d) {
-            document.location.reload();
-        }
-    </script>
-
 <script>
     window.refs = {};
     function setupDotnetRef(dotnetRef, id) {
         window.refs[id] = dotnetRef;
     }
+</script>
+
+<script autostart="false" src="_framework/blazor.server.js"></script>
+<script>
+    Blazor.start({
+        reconnectionHandler: {
+          onConnectionDown: (options, error) => console.error(error),
+          onConnectionUp: () => document.location.reload();
+        }
+      });
 </script>
 
 
