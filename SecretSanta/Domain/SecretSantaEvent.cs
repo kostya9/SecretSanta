@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json;
 
@@ -7,15 +8,23 @@ namespace SecretSanta.Domain
 {
     public record SecretSantaMember(string Name, string TelegramLogin);
 
-    public record MaxPrice(string Value, string Currency);
+    public record MaxPrice(int Value, string Currency);
 
     public record Metadata(JsonDocument Content)
     {
-        public MaxPrice? Price => Content.RootElement.TryGetProperty(MaxPriceKey, out var marPrice)
-            ? marPrice.Deserialize<MaxPrice>()
-            : null;
+        public bool TryGetPrice([NotNullWhen(true)] out MaxPrice? price)
+        {
+            if (Content.RootElement.TryGetProperty(MaxPriceKey, out var maxPrice))
+            {
+                price = maxPrice.Deserialize<MaxPrice>()!;
+                return true;
+            }
 
-        public string MaxPriceKey => "maxPrice";
+            price = null;
+            return false;
+        }
+
+        public static string MaxPriceKey => "maxPrice";
     };
 
     public class SecretSantaEvent

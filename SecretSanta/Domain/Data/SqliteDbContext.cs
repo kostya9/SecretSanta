@@ -23,7 +23,7 @@ namespace SecretSanta.Domain.Data
             eventTable.Property(p => p.Uid).HasColumnName("uid");
             eventTable.Property(p => p.Metadata).HasColumnName("metadata")
                 .HasConversion(
-                    m => m.ToString(),
+                    m => m.RootElement.ToString(),
                     s => JsonDocument.Parse(string.IsNullOrWhiteSpace(s) ? "{}": s, new JsonDocumentOptions()));
 
             var membershipTable = modelBuilder.Entity<PersistedSantaEventMembership>().ToTable("santa_event_membership");

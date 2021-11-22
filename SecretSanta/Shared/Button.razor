@@ -1,4 +1,4 @@
-﻿<button type="button" class="shadow-md bg-red-300 rounded px-5 disabled:bg-gray-300 disabled:text-red-400 @SizeClass" disabled="@Disabled" @onclick="OnClick">
+﻿<button type="button" class="shadow-md bg-red-300 rounded px-5 disabled:bg-gray-300 disabled:text-red-400 @SizeClass @Class" disabled="@Disabled" @onclick="OnClick">
     @ChildContent
 </button>
 
@@ -14,6 +14,9 @@
 
     [Parameter]
     public ButtonSize Size { get; set; } = ButtonSize.Normal;
+
+    [Parameter]
+    public string Class { get; set; } = "";
 
     private string SizeClass => Size == ButtonSize.Large ? "w-96" : string.Empty;
 }

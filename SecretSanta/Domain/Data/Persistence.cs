@@ -60,7 +60,8 @@ namespace SecretSanta.Domain.Data
             await dbContext.Events.AddAsync(new SqliteDbContext.PersistedSantaEvent()
             {
                 Name = santaEvent.Name,
-                Uid = santaEvent.Uid
+                Uid = santaEvent.Uid,
+                Metadata = santaEvent.Metadata.Content
             });
 
             var opponents = santaEvent.Opponents;

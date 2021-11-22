@@ -2,6 +2,7 @@
 
 @using SecretSanta.Domain.State
 @using SecretSanta.Domain
+@using System.Diagnostics.CodeAnalysis
 @inject UserSantaEvents SantaEvents
 @inject NavigationManager Navigation
 @inject IJSRuntime Js
@@ -36,6 +37,13 @@
     }
 </div>
 
+@if(TryGetPrice(out var price)) 
+{
+    <div class="bg-red-100 p-3">
+        Max Price: @price.Value @price.Currency
+    </div>
+}
+
 @code {
 
     [Parameter]
@@ -46,6 +54,13 @@
     private IEnumerable<SecretSantaMember> Members => Selected?.TelegramUsers ?? Array.Empty<SecretSantaMember>();
 
     private SecretSantaEvent Selected { get; set; }
+
+    private bool TryGetPrice([NotNullWhen(true)] out MaxPrice? price)
+    {
+        price = null;
+
+        return Selected?.Metadata.TryGetPrice(out price) ?? false;
+    }
 
     protected override void OnParametersSet()
     {

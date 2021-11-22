@@ -2,6 +2,9 @@
 @using SecretSanta.Domain
 @using SecretSanta.Domain.Data
 @using SecretSanta.Domain.State
+@using System.Text.Json
+@using System.Text.Json.Nodes
+@using System.Text.Json.Serialization
 
 @inject NavigationManager Navigation
 @inject UserSantaEvents SantaEvents
@@ -68,13 +71,46 @@
     </Button>
 </div>
 
+<div class="my-5 bg-red-50 p-3">
+    @if(!_enabledPrice)
+    {
+        <Button OnClick="(_) => SetPriceEnabled(true)" Class="mx-auto block my-2">
+            Add Price
+        </Button>
+    }
+    else
+    {
+        <Button OnClick="(_) => SetPriceEnabled(false)" Class="mx-auto block my-2">
+            Remove Price
+        </Button>
+        
+        <label class="">
+        Maximum price?
+        </label>
+        <br />
+
+        <input type="number" min="1" class="block p-1 box-border rounded outline-none my-2" @bind-value="Price" @bind-value:event="oninput" placeholder="Max Price"/>
+
+        <input type="text" class="block p-1 box-border rounded outline-none my-2" @bind-value="Currency" @bind-value:event="oninput" placeholder="Currency"/>
+    }
+</div>
+
 <div class="flex justify-center my-5">
     <Button Size="ButtonSize.Large" OnClick="Save" Disabled="!CanSave">Save</Button>
 </div>
 
 @code {
     private readonly List<SecretSantaMember> _members = new();
-    private string _errorText;
+    private string? _errorText;
+
+    private bool _enabledPrice;
+
+
+
+    private void SetPriceEnabled(bool value)
+    {
+        _enabledPrice = value;
+    }
 
     private void RemoveMember(SecretSantaMember member)
     {
@@ -91,7 +127,7 @@
             _errorText = "Member with such a name already exists.";
             return;
         }
-        
+
         if (_members.Any(m => m.TelegramLogin.Equals(NewMemberLogin, StringComparison.InvariantCultureIgnoreCase)))
         {
             _errorText = "Member with such a login already exists.";
@@ -104,34 +140,64 @@
         NewMemberLogin = null;
         _errorText = null;
     }
-    
+
     private async Task Save()
     {
         if (!CanSave)
             return;
 
+        var metadataNode = JsonObject.Parse("{}")!;
+
+        if(_enabledPrice)
+        {
+            metadataNode[Metadata.MaxPriceKey] = JsonSerializer.SerializeToNode(
+                new MaxPrice(Price!.Value, Currency!));
+        }
+
+        var metadataDocument = JsonSerializer.SerializeToDocument(metadataNode);
+
         _members.Add(new SecretSantaMember(LoggedInName!.Trim(), Auth.Login.Login));
-        var santaEvent = SecretSantaEvent.Create(EventName!.Trim(), _members, null);
+        var santaEvent = SecretSantaEvent.Create(EventName!.Trim(), _members, new Metadata(metadataDocument));
         SantaEvents.AddEvent(santaEvent);
         Navigation.NavigateTo("/");
-        
+
         NewMemberName = null;
         NewMemberLogin = null;
         _members.Clear();
         await Persistence.SaveEvent(santaEvent);
     }
-    
+
 
     bool Disabled => string.IsNullOrWhiteSpace(NewMemberName) || string.IsNullOrWhiteSpace(NewMemberLogin);
 
-    bool CanSave => _members.Count >= 1 && !string.IsNullOrWhiteSpace(EventName) && !string.IsNullOrWhiteSpace(LoggedInName);
+    bool CanSave 
+    { 
+        get
+        {
+            var isValid = _members.Count >= 1 && !string.IsNullOrWhiteSpace(EventName) && !string.IsNullOrWhiteSpace(LoggedInName);
+
+            if (_enabledPrice)
+            {
+                if(!Price.HasValue || Price < 1 || string.IsNullOrWhiteSpace(Currency))
+                {
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
+    }
 
     public string? NewMemberName { get; set; }
 
     public string? NewMemberLogin { get; set; }
 
     public string? EventName { get; set; }
-    
+
     public string? LoggedInName { get; set; }
+
+    public int? Price { get; set; }
+
+    public string? Currency { get; set; }
 
 }
