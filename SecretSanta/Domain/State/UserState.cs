@@ -1,15 +1,14 @@
-﻿namespace SecretSanta.Domain.State
+﻿namespace SecretSanta.Domain.State;
+
+public class UserState
 {
-    public class UserState
+    public UserState()
     {
-        public UserState()
-        {
-            Auth = new TelegramAuth();
-            SantaEvents = new UserSantaEvents();
-        }
-
-        public TelegramAuth Auth { get; }
-
-        public UserSantaEvents SantaEvents { get; }
+        Auth = new TelegramAuth();
+        SantaEvents = new UserSantaEvents();
     }
+
+    public TelegramAuth Auth { get; }
+
+    public UserSantaEvents SantaEvents { get; }
 }

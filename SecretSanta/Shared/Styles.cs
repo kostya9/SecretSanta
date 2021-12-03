@@ -1,7 +1,6 @@
-﻿namespace SecretSanta.Shared
+﻿namespace SecretSanta.Shared;
+
+public enum ButtonSize
 {
-    public enum ButtonSize
-    {
-        Normal, Large
-    }
+    Normal, Large
 }
