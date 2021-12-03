@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SecretSanta.Domain.State
+﻿namespace SecretSanta.Domain.State
 {
     public class UserSantaEvents
     {

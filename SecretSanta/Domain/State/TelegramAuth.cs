@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SecretSanta.Domain.State
+﻿namespace SecretSanta.Domain.State
 {
     public record TelegramLogin(string Login);
     
