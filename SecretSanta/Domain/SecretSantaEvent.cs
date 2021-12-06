@@ -28,7 +28,8 @@ public class SecretSantaEvent
 {
     private readonly SecretSantaMember[] _users;
     private readonly Dictionary<string, SecretSantaMember> _opponents;
-    private readonly SecretSantaMember _owner;
+
+    public SecretSantaMember Owner { get; }
 
     public IEnumerable<SecretSantaMember> TelegramUsers => _users.ToArray();
 
@@ -52,7 +53,7 @@ public class SecretSantaEvent
         Uid = uid;
         Name = name;
         Metadata = metadata;
-        _owner = owner;
+        Owner = owner;
         Archived = archived;
     }
 
@@ -71,7 +72,7 @@ public class SecretSantaEvent
 
     public bool IsOwner(string userId)
     {
-        return _owner.TelegramLogin.Equals(userId, StringComparison.OrdinalIgnoreCase);
+        return Owner.TelegramLogin.Equals(userId, StringComparison.OrdinalIgnoreCase);
     }
 
     public static SecretSantaEvent Create(string name, IList<SecretSantaMember> members, Metadata metadata)

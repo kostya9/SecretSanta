@@ -156,7 +156,7 @@
 
         var metadataDocument = JsonSerializer.SerializeToDocument(metadataNode);
 
-        _members.Add(new SecretSantaMember(LoggedInName!.Trim(), Auth.Login.Login));
+        _members.Insert(0, new SecretSantaMember(LoggedInName!.Trim(), Auth.Login.Login));
         var santaEvent = SecretSantaEvent.Create(EventName!.Trim(), _members, new Metadata(metadataDocument));
         SantaEvents.AddEvent(santaEvent);
         Navigation.NavigateTo("/");

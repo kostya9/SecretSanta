@@ -70,7 +70,9 @@ public class Persistence
         {
             Name = santaEvent.Name,
             Uid = santaEvent.Uid,
-            Metadata = santaEvent.Metadata.Content
+            Metadata = santaEvent.Metadata.Content,
+            OwnerId = santaEvent.Owner.TelegramLogin,
+            Archived = false
         });
 
         var opponents = santaEvent.Opponents;
