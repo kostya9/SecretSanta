@@ -90,7 +90,8 @@ public class BotWrapper : IDisposable
             var archived = events.Where(e => e.Archived).ToArray();
             if (archived.Length > 0)
             {
-                sb.AppendLine("----- Archived ----");
+                sb.AppendLine();
+                sb.AppendLine("----- Archived (old) ----");
 
                 foreach (var archivedEvent in archived)
                 {
