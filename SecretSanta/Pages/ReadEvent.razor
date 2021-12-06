@@ -1,9 +1,12 @@
 ﻿@page "/{Uid}/selected"
 
+@using SecretSanta.Domain.Data
 @using SecretSanta.Domain.State
 @using SecretSanta.Domain
 @using System.Diagnostics.CodeAnalysis
+@inject Persistence Persistence
 @inject UserSantaEvents SantaEvents
+@inject TelegramAuth TelegramAuth
 @inject NavigationManager Navigation
 @inject IJSRuntime Js
 
@@ -44,6 +47,16 @@
     </div>
 }
 
+@if(IsOwner)
+{
+    <div class="my-5 bg-red-50 p-3">
+        <label>
+            Archived?
+            <input type="checkbox" @onchange="(args) => SetArchived(args)" checked=@Selected.Archived />
+        </label>
+    </div>
+}
+
 @code {
 
     [Parameter]
@@ -53,6 +66,8 @@
 
     private IEnumerable<SecretSantaMember> Members => Selected?.TelegramUsers ?? Array.Empty<SecretSantaMember>();
 
+    private bool IsOwner => Selected?.IsOwner(TelegramAuth.Login.Login) ?? false;
+
     private SecretSantaEvent Selected { get; set; }
 
     private bool TryGetPrice([NotNullWhen(true)] out MaxPrice? price)
@@ -60,6 +75,14 @@
         price = null;
 
         return Selected?.Metadata.TryGetPrice(out price) ?? false;
+    }
+
+    private async Task SetArchived(ChangeEventArgs args)
+    {
+        var archived = (bool)args.Value;
+        Selected.SetArchived(archived);
+        await Persistence.SaveArchived(Selected);
+
     }
 
     protected override void OnParametersSet()

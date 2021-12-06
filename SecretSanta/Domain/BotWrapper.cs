@@ -71,7 +71,9 @@ public class BotWrapper : IDisposable
 
             var sb = new StringBuilder();
 
-            foreach (var santaEvent in events)
+            sb.AppendLine("----- Current ----");
+
+            foreach (var santaEvent in events.Where(e => !e.Archived))
             {
                 var opponent = santaEvent.GetOpponentFor(message.From.Username);
 
@@ -83,6 +85,26 @@ public class BotWrapper : IDisposable
 
                 sb.AppendLine(
                     $"For event '{santaEvent.Name}', buy a present for {opponent.Name} (@{opponent.TelegramLogin})!");
+            }
+
+            var archived = events.Where(e => e.Archived).ToArray();
+            if (archived.Length > 0)
+            {
+                sb.AppendLine("----- Archived ----");
+
+                foreach (var archivedEvent in archived)
+                {
+                    var opponent = archivedEvent.GetOpponentFor(message.From.Username);
+
+                    if (opponent is null)
+                    {
+                        _log.LogWarning("opponent is null for @{update}", update);
+                        return;
+                    }
+
+                    sb.AppendLine(
+                        $"For event '{archivedEvent.Name}', you bought a present for {opponent.Name} (@{opponent.TelegramLogin})!");
+                }
             }
 
             if (events.Length == 0)

@@ -28,6 +28,7 @@ public class SecretSantaEvent
 {
     private readonly SecretSantaMember[] _users;
     private readonly Dictionary<string, SecretSantaMember> _opponents;
+    private readonly SecretSantaMember _owner;
 
     public IEnumerable<SecretSantaMember> TelegramUsers => _users.ToArray();
 
@@ -40,8 +41,10 @@ public class SecretSantaEvent
 
     public Metadata Metadata { get; }
 
+    public bool Archived { get; private set; }
+
     public SecretSantaEvent(string uid, string name, SecretSantaMember[] members,
-        Dictionary<SecretSantaMember, SecretSantaMember> mapping, Metadata metadata)
+        Dictionary<SecretSantaMember, SecretSantaMember> mapping, SecretSantaMember owner, bool archived, Metadata metadata)
     {
         _users = members;
         _opponents =
@@ -49,6 +52,8 @@ public class SecretSantaEvent
         Uid = uid;
         Name = name;
         Metadata = metadata;
+        _owner = owner;
+        Archived = archived;
     }
 
     public SecretSantaMember? GetOpponentFor(string? username)
@@ -57,6 +62,16 @@ public class SecretSantaEvent
             return null;
 
         return _opponents.GetValueOrDefault(username);
+    }
+
+    public void SetArchived(bool value)
+    {
+        Archived = value;
+    }
+
+    public bool IsOwner(string userId)
+    {
+        return _owner.TelegramLogin.Equals(userId, StringComparison.OrdinalIgnoreCase);
     }
 
     public static SecretSantaEvent Create(string name, IList<SecretSantaMember> members, Metadata metadata)
@@ -81,7 +96,8 @@ public class SecretSantaEvent
             {
                 var mapping = candidateToCandidateNumber.Select((i, j) => (i, j))
                     .ToDictionary(pair => members[pair.i], pair => members[pair.j]);
-                return new(Guid.NewGuid().ToString(), name, members.ToArray(), mapping, metadata);
+                var owner = members.First();
+                return new(Guid.NewGuid().ToString(), name, members.ToArray(), mapping, owner, archived: false, metadata);
             }
         }
     }

@@ -20,7 +20,9 @@ public class SqliteDbContext : DbContext
         var eventTable = modelBuilder.Entity<PersistedSantaEvent>().ToTable("santa_event");
         eventTable.HasKey(e => e.Uid);
         eventTable.Property(p => p.Name).HasColumnName("name");
+        eventTable.Property(p => p.OwnerId).HasColumnName("owner_id");
         eventTable.Property(p => p.Uid).HasColumnName("uid");
+        eventTable.Property(p => p.Archived).HasColumnName("archived");
         eventTable.Property(p => p.Metadata).HasColumnName("metadata")
             .HasConversion(
                 m => m.RootElement.ToString(),
@@ -53,6 +55,10 @@ public class SqliteDbContext : DbContext
         public string Uid { get; set; }
 
         public string Name { get; set; }
+
+        public string OwnerId { get; set; }
+
+        public bool Archived { get; set; }
 
         public JsonDocument Metadata { get; set; }
     }

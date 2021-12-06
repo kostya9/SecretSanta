@@ -36,16 +36,30 @@ public class Persistence
                 m => loginMapping[m.OpponentTelegramLogin]);
             var metadata = persistedSantaEvent.Metadata;
 
+            var owner = mappedMembers.First(m => m.TelegramLogin == persistedSantaEvent.OwnerId);
 
             var santaEvent = new SecretSantaEvent(persistedSantaEvent.Uid,
                 persistedSantaEvent.Name,
                 mappedMembers,
                 opponentMapping,
+                owner,
+                persistedSantaEvent.Archived,
                 new(metadata));
             events.Add(santaEvent);
         }
 
         return events.ToArray();
+    }
+
+    public async Task SaveArchived(SecretSantaEvent santaEvent)
+    {
+        await using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var persisted = await dbContext.Events.FindAsync(santaEvent.Uid);
+
+        persisted.Archived = santaEvent.Archived;
+
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task SaveEvent(SecretSantaEvent santaEvent)
