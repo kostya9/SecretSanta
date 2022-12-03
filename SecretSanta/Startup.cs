@@ -27,8 +27,13 @@ public class Startup
         services.AddScoped(provider => provider.GetRequiredService<UserState>().Auth);
         services.AddScoped(provider => provider.GetRequiredService<UserState>().SantaEvents);
         services.AddSingleton<Persistence>();
-        services.AddSingleton(p => new BotWrapper(Configuration.GetValue<string>("DOTNET_BOT_KEY"),
-            p.GetRequiredService<Persistence>(), p.GetRequiredService<ILogger<BotWrapper>>()));
+        services.AddLocalization(opt =>
+        {
+            opt.ResourcesPath = "Resources";
+        });
+        var botKey = Configuration.GetValue<string>("DOTNET_BOT_KEY") ??
+                     throw new Exception("Expected bot key to be present");
+        services.AddSingleton(p => new BotWrapper(botKey, p.GetRequiredService<Persistence>(), p.GetRequiredService<ILogger<BotWrapper>>()));
 
         services.AddHttpsRedirection(opt => { opt.RedirectStatusCode = 301; });
 

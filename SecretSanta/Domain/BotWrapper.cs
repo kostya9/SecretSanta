@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using SecretSanta.Domain.Data;
 using Telegram.Bot;
-using Telegram.Bot.Extensions.Polling;
+using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -28,7 +28,7 @@ public class BotWrapper : IDisposable
 
     public void StartReceivingMessages()
     {
-        var updateReceiver = new QueuedUpdateReceiver(_bot, new ReceiverOptions()
+        var updateReceiver = new QueuedUpdateReceiver(_bot, new ReceiverOptions
         {
             AllowedUpdates = new[] { UpdateType.Message }
         });
@@ -37,12 +37,12 @@ public class BotWrapper : IDisposable
         {
             await foreach (var message in updateReceiver.WithCancellation(_stopCts.Token))
             {
-                OnNewTelegramMessage(message);
+                await OnNewTelegramMessage(message);
             }
         }, _stopCts.Token);
     }
 
-    private void OnNewTelegramMessage(Update update)
+    private async Task OnNewTelegramMessage(Update update)
     {
         var message = update.Message;
 
@@ -113,7 +113,7 @@ public class BotWrapper : IDisposable
                 sb.AppendLine("Sorry, I do not know any events for you.");
             }
 
-            _bot.SendTextMessageAsync(chatId, sb.ToString()).GetAwaiter().GetResult();
+            await _bot.SendTextMessageAsync(chatId, sb.ToString());
             _log.LogInformation("Sent a message to @{username}", message.Chat.Username);
         }
     }
