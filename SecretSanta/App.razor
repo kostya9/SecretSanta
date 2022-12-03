@@ -1,6 +1,9 @@
 @using SecretSanta.Domain.State
+@using Microsoft.Extensions.Localization
 @inject TelegramAuth Auth
 @inject UserSantaEvents SantaEvents
+@inject NavigationManager Navigation
+@inject IStringLocalizer Localizer
 @implements IDisposable
 
 <LayoutView Layout="@typeof(MainLayout)">
@@ -11,7 +14,7 @@
             {
                 <LoginWithTelegram/>
                 
-                <div><h2 class="text-xs mt-10">If you can not login and somebody sent you a link, you can check who to buy presents for here <a target="_blank" class="text-blue-500 underline cursor-pointer" href="https://t.me/secret_santa_presents_bot">@@secret_santa_presents_bot</a>.</h2></div>
+                <div><h2 class="text-xs mt-10">@Localizer.GetString("TryTelegramBot") <a target="_blank" class="text-blue-500 underline cursor-pointer" href="https://t.me/secret_santa_presents_bot">@@secret_santa_presents_bot</a>.</h2></div>
                 <div><h2 class="text-xs">This app is open source. You can check the code <a class="text-blue-500 underline cursor-pointer" href="https://github.com/kostya9/SecretSanta" target="_blank">at GitHub</a> </h2></div>
             }
             else
@@ -19,9 +22,15 @@
                 <CascadingValue Value="Auth.Login!">
                     <RouteView RouteData="@routeData" />
                 </CascadingValue>
-                <div><h2 class="text-xs mt-10">You are currently logged in as <i>@@@Auth.Login.Login</i>. <a class="text-blue-500 underline cursor-pointer" @onclick="LogOut">Log out</a> </h2></div>
-                <div><h2 class="text-xs">This app is open source. You can check the code <a class="text-blue-500 underline cursor-pointer" href="https://github.com/kostya9/SecretSanta" target="_blank">at GitHub</a> </h2></div>
-                <div><h2 class="text-xs text-blue-500 underline cursor-pointer"><NavLink href="/credits">Picture credits</NavLink></h2></div>
+                <div><h2 class="text-xs mt-10">@Localizer.GetString("YouAreLoggedIn") <i>@@@Auth.Login.Login</i>. <a class="text-blue-500 underline cursor-pointer" @onclick="LogOut">@Localizer.GetString("LogOut")</a> </h2></div>
+                <div><h2 class="text-xs">@Localizer.GetString("AppIsOpenSource") <a class="text-blue-500 underline cursor-pointer" href="https://github.com/kostya9/SecretSanta" target="_blank">GitHub</a> </h2></div>
+                <div><h2 class="text-xs text-blue-500 underline cursor-pointer"><NavLink href="/credits">@Localizer.GetString("PictureCredits")</NavLink></h2></div>
+                <div>
+                    <div class="flex flex-row space-x-2">
+                        <img class="w-10 cursor-pointer" src="img/ua-icon.png" alt="UA language" @onclick='() => SetLocalization("uk")'/>
+                        <img class="w-10 cursor-pointer" src="img/en-icon.png" alt="EN language" @onclick='() => SetLocalization("en")'/>
+                    </div>
+                </div>
             }
         </div>
     </Found>
@@ -48,6 +57,15 @@
     public void Dispose()
     {
         Auth.AuthChanged -= OnAuthChanged;
+    }
+
+    private void SetLocalization(string localization)
+    {
+        var uri = new Uri(Navigation.Uri)
+            .GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
+        var uriEscaped = Uri.EscapeDataString(uri);
+        var cultureEscaped = Uri.EscapeDataString(localization);
+        Navigation.NavigateTo($"localization?culture={cultureEscaped}&redirectUri={uriEscaped}", forceLoad: true);
     }
 
     private void LogOut()

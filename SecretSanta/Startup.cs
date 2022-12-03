@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using SecretSanta.Domain;
 using SecretSanta.Domain.Data;
 using SecretSanta.Domain.State;
@@ -31,6 +33,8 @@ public class Startup
         {
             opt.ResourcesPath = "Resources";
         });
+        services.AddSingleton<IStringLocalizer>(opt =>
+            opt.GetRequiredService<IStringLocalizerFactory>().Create("SecretSanta", "SecretSanta"));
         var botKey = Configuration.GetValue<string>("DOTNET_BOT_KEY") ??
                      throw new Exception("Expected bot key to be present");
         services.AddSingleton(p => new BotWrapper(botKey, p.GetRequiredService<Persistence>(), p.GetRequiredService<ILogger<BotWrapper>>()));
@@ -61,6 +65,13 @@ public class Startup
             // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
             app.UseHsts();
         }
+        
+        var localizeOptions = new RequestLocalizationOptions()
+            .SetDefaultCulture("en")
+            .AddSupportedCultures("en", "uk")
+            .AddSupportedUICultures("en", "uk");
+
+        app.UseRequestLocalization(localizeOptions);
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
@@ -69,6 +80,16 @@ public class Startup
 
         app.UseEndpoints(endpoints =>
         {
+            endpoints.MapGet("localization", (string culture, string redirectUri, HttpContext httpContext) =>
+            {
+                httpContext.Response.Cookies.Append(
+                    CookieRequestCultureProvider.DefaultCookieName,
+                    CookieRequestCultureProvider.MakeCookieValue(
+                        new RequestCulture(culture, culture)));
+                
+                return Results.LocalRedirect(redirectUri);
+            });
+            
             endpoints.MapBlazorHub();
             endpoints.MapFallbackToPage("/_Host");
         });
