@@ -34,7 +34,7 @@ jobs:
         authkey: ${{ secrets.TAILSCALE_KEY }}
     - name: Configure SSH
       run: |
-        MACHINE_IP="$(tailscale ip -6 sharovarskyi-com)"
+        MACHINE_IP="$(tailscale ip -6 sharovarskyi)"
         mkdir -p ~/.ssh/
         echo "$DEPLOY_SECRET" > ~/.ssh/site.key
         chmod 600 ~/.ssh/site.key
