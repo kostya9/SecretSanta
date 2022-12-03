@@ -16,7 +16,7 @@ public class Persistence
         if (string.IsNullOrWhiteSpace(telegramLogin))
             return Array.Empty<SecretSantaEvent>();
 
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var userMembership = await dbContext.Memberships.AsNoTracking().Where(m => m.TelegramLogin == telegramLogin).ToArrayAsync();
 
@@ -53,7 +53,7 @@ public class Persistence
 
     public async Task SaveArchived(SecretSantaEvent santaEvent)
     {
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var persisted = await dbContext.Events.FindAsync(santaEvent.Uid);
 
@@ -64,7 +64,7 @@ public class Persistence
 
     public async Task SaveEvent(SecretSantaEvent santaEvent)
     {
-        await using var dbContext = _dbContextFactory.CreateDbContext();
+        await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
         await dbContext.Events.AddAsync(new SqliteDbContext.PersistedSantaEvent()
         {
