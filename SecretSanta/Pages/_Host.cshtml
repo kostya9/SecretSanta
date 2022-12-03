@@ -45,8 +45,10 @@
             set(value) {
                 this.__reconnectionDisplay = {
                     show: () => value.show(),
+                    hide: () => value.hide(),
+                    failed: () => value.failed(),
                     update: (d) => value.update(d),
-                    rejected: (d) => document.location.reload()
+                    rejected: () => document.location.reload()
                 }
             }
         });
