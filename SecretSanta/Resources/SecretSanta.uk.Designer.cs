@@ -78,6 +78,15 @@ namespace SecretSanta.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ця подія не активна. Сторінка залишилась тільки для історії..
+        /// </summary>
+        internal static string EventArchived {
+            get {
+                return ResourceManager.GetString("EventArchived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Дана подія не знайдена.
         /// </summary>
         internal static string EventNotFound {
