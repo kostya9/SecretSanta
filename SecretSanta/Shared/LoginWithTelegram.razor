@@ -4,6 +4,7 @@
 @using SecretSanta.Domain.State
 @using SecretSanta.Interop
 @using System.Text.Json
+@using Microsoft.Extensions.Localization
 @using SecretSanta.Domain.Data
 @inject IHostEnvironment Environment
 @inject IJSRuntime Js
@@ -11,6 +12,7 @@
 @inject UserSantaEvents SantaEvents
 @inject Persistence Persistence
 @inject BotWrapper BotWrapper
+@inject IStringLocalizer Localizer
 
 @if (Environment.IsDevelopment())
 {
@@ -21,7 +23,7 @@
 else
 {
     <div class="text-center">
-        <h3 class="text-2xl font-bold">Log In With Telegram</h3>
+        <h3 class="text-2xl font-bold">@Localizer.GetString("LoginWithTelegram")</h3>
     </div>
     
     <div class="flex justify-center m-5">

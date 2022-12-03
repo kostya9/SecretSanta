@@ -87,6 +87,15 @@ namespace SecretSanta.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Авторизуватись за допомогою Telegram.
+        /// </summary>
+        internal static string LoginWithTelegram {
+            get {
+                return ResourceManager.GetString("LoginWithTelegram", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Вийти.
         /// </summary>
         internal static string LogOut {
