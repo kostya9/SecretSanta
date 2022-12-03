@@ -7,37 +7,51 @@
 @implements IDisposable
 
 <LayoutView Layout="@typeof(MainLayout)">
-<Router AppAssembly="@typeof(Program).Assembly">
-    <Found Context="routeData">
-        <div class="container md:w-6/12 w-full mx-auto p-10">
-            @if (!Auth.IsLoggedIn)
-            {
-                <LoginWithTelegram/>
-                
-                <div><h2 class="text-xs mt-10">@Localizer.GetString("TryTelegramBot") <a target="_blank" class="text-blue-500 underline cursor-pointer" href="https://t.me/secret_santa_presents_bot">@@secret_santa_presents_bot</a>.</h2></div>
-                <div><h2 class="text-xs">@Localizer.GetString("AppIsOpenSource") <a class="text-blue-500 underline cursor-pointer" href="https://github.com/kostya9/SecretSanta" target="_blank">GitHub</a> </h2></div>
-            }
-            else
-            {
-                <CascadingValue Value="Auth.Login!">
-                    <RouteView RouteData="@routeData" />
-                </CascadingValue>
-                <div><h2 class="text-xs mt-10">@Localizer.GetString("YouAreLoggedIn") <i>@@@Auth.Login.Login</i>. <a class="text-blue-500 underline cursor-pointer" @onclick="LogOut">@Localizer.GetString("LogOut")</a> </h2></div>
-                <div><h2 class="text-xs">@Localizer.GetString("AppIsOpenSource") <a class="text-blue-500 underline cursor-pointer" href="https://github.com/kostya9/SecretSanta" target="_blank">GitHub</a> </h2></div>
-                <div><h2 class="text-xs text-blue-500 underline cursor-pointer"><NavLink href="/credits">@Localizer.GetString("PictureCredits")</NavLink></h2></div>
-            }
-            <div>
-                <div class="flex flex-row space-x-2">
-                    <img class="w-10 cursor-pointer" src="img/ua-icon.png" alt="UA language" @onclick='() => SetLocalization("uk")'/>
-                    <img class="w-10 cursor-pointer" src="img/en-icon.png" alt="EN language" @onclick='() => SetLocalization("en")'/>
+    <Router AppAssembly="@typeof(Program).Assembly">
+        <Found Context="routeData">
+            <div class="container md:w-6/12 w-full mx-auto p-10">
+                @if (Auth.IsLoggedIn)
+                {
+                    <CascadingValue Value="Auth.Login!">
+                        <RouteView RouteData="@routeData"/>
+                    </CascadingValue>
+                }
+                else
+                {
+                    <LoginWithTelegram/>
+                }
+
+                <div class="space-y-1 border-black mt-10">
+                    @if (Auth.IsLoggedIn)
+                    {
+                        <div>
+                            <h2 class="text-xs">@Localizer.GetString("YouAreLoggedIn") <i>@@@Auth.Login.Login</i>. <a class="text-blue-500 underline cursor-pointer" @onclick="LogOut">@Localizer.GetString("LogOut")</a> </h2>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <h2 class="text-xs">@Localizer.GetString("TryTelegramBot") <a target="_blank" class="text-blue-500 underline cursor-pointer" href="https://t.me/secret_santa_presents_bot">@@secret_santa_presents_bot</a>.</h2>
+                        </div>
+                    }
+                    <div>
+                        <h2 class="text-xs">
+                            @Localizer.GetString("AppIsOpenSource") <a class="text-blue-500 underline cursor-pointer" href="https://github.com/kostya9/SecretSanta" target="_blank">GitHub</a>
+                        </h2>
+                    </div>
+                    <div>
+                        <div class="flex flex-row space-x-2">
+                            <img class="w-10 cursor-pointer" src="img/ua-icon.png" alt="UA language" @onclick='() => SetLocalization("uk")'/>
+                            <img class="w-10 cursor-pointer" src="img/en-icon.png" alt="EN language" @onclick='() => SetLocalization("en")'/>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </Found>
-    <NotFound>
-        <p>Sorry, there's nothing at this address.</p>
-    </NotFound>
-</Router>
+        </Found>
+        <NotFound>
+            <p>Sorry, there's nothing at this address.</p>
+        </NotFound>
+    </Router>
 </LayoutView>
 
 @code
