@@ -206,9 +206,8 @@
 
     private async Task UpdateAutocomplete()
     {
-        Console.WriteLine("haha");
         AutocompleteLogins = await Persistence.GetAutocompleteFor(Auth.Login.Login, NewMemberLogin);
-        this.StateHasChanged();
+        StateHasChanged();
     }
 
     public string[] AutocompleteLogins { get; set; } = Array.Empty<string>();
