@@ -4,7 +4,6 @@
 @using SecretSanta.Domain.State
 @using System.Text.Json
 @using System.Text.Json.Nodes
-@using System.Text.Json.Serialization
 
 @inject NavigationManager Navigation
 @inject UserSantaEvents SantaEvents
@@ -40,7 +39,7 @@
     {
         <div class="bg-red-50 rounded w-96 p-3 m-3">
             <div>Name: @member.Name</div>
-            <div>Telegram Username: @member.TelegramLogin</div>
+            <div>Telegram Username: <a class="text-blue-700 underline" target="_blank" href="https://t.me/@member.TelegramLogin">@member.TelegramLogin</a></div>
             <Button OnClick="() => RemoveMember(member)">Remove</Button>
         </div>
     }

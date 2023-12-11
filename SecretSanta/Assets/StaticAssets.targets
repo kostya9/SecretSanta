@@ -23,8 +23,8 @@
 
     <!-- If any source file in this dir or below has changed, perform a Webpack build -->
     <Target Name="BuildStaticAssets"
-            DependsOnTargets="NpmInstall"
-            BeforeTargets="CoreBuild"
+            DependsOnTargets="NpmInstall;PrepareForBuild"
+            BeforeTargets="CoreCompile"
             Inputs="@(StaticAssets)"
             Outputs="$(MSBuildThisFileDirectory)..\wwwroot\$(StaticCSSPath)">
         <Exec Command="npm run build:$(Configuration)" WorkingDirectory="$(MSBuildThisFileDirectory)" />
@@ -32,8 +32,8 @@
 
     <!--Copy Images to wwwroot-->
     <Target Name="BuildImages"
-             DependsOnTargets="NpmInstall"
-             BeforeTargets="CoreBuild"
+             DependsOnTargets="NpmInstall;PrepareForBuild"
+             BeforeTargets="CoreCompile"
              Inputs="@(StaticAssets)"
              Outputs="$(MSBuildThisFileDirectory)..\wwwroot\img\**">
         <ItemGroup>
@@ -47,8 +47,8 @@
 
     <!--Copy Favicon to wwwroot-->
     <Target Name="BuildImagesFavicon"
-            DependsOnTargets="NpmInstall"
-            BeforeTargets="CoreBuild"
+            DependsOnTargets="NpmInstall;PrepareForBuild"
+            BeforeTargets="CoreCompile"
             Inputs="@(StaticAssets)"
             Outputs="$(MSBuildThisFileDirectory)..\wwwroot\favicon\favicon.ico">
         
