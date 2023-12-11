@@ -204,9 +204,9 @@
 
     public string? Currency { get; set; }
 
-    private async Task UpdateAutocomplete()
+    private async Task UpdateAutocomplete(ChangeEventArgs eventArgs)
     {
-        AutocompleteLogins = await Persistence.GetAutocompleteFor(Auth.Login.Login, NewMemberLogin);
+        AutocompleteLogins = await Persistence.GetAutocompleteFor(Auth.Login.Login, eventArgs.Value as string);
         StateHasChanged();
     }
 
