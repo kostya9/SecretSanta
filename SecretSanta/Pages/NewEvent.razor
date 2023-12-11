@@ -63,7 +63,14 @@
         <label>
             Telegram Username
         </label>
-        <input type="text" class="p-1 box-border rounded outline-none block" @bind-value="NewMemberLogin" @bind-value:event="oninput"/>
+        <input list="tg-login" type="text" class="p-1 box-border rounded outline-none block" @bind="NewMemberLogin" @oninput="UpdateAutocomplete"/>
+        <datalist id="tg-login">
+            @foreach (var login in AutocompleteLogins)
+            {
+                <option>@login</option>
+            }
+        </datalist>
+        
     </div>
     <Button OnClick="Add" Disabled="Disabled">
         Add
@@ -103,8 +110,6 @@
     private string? _errorText;
 
     private bool _enabledPrice;
-
-
 
     private void SetPriceEnabled(bool value)
     {
@@ -198,5 +203,14 @@
     public int? Price { get; set; }
 
     public string? Currency { get; set; }
+
+    private async Task UpdateAutocomplete()
+    {
+        Console.WriteLine("haha");
+        AutocompleteLogins = await Persistence.GetAutocompleteFor(Auth.Login.Login, NewMemberLogin);
+        this.StateHasChanged();
+    }
+
+    public string[] AutocompleteLogins { get; set; } = Array.Empty<string>();
 
 }

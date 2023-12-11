@@ -48,6 +48,8 @@ public class SqliteDbContext : DbContext
         public string OpponentTelegramLogin { get; set; }
 
         public string Name { get; set; }
+
+        public PersistedSantaEvent Event { get; set; }
     }
 
     public class PersistedSantaEvent

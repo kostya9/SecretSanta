@@ -18,12 +18,14 @@ public class Persistence
 
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var userMembership = await dbContext.Memberships.AsNoTracking().Where(m => m.TelegramLogin == telegramLogin).ToArrayAsync();
+        var userMembership = await dbContext.Memberships.AsNoTracking().Where(m => m.TelegramLogin == telegramLogin)
+            .ToArrayAsync();
 
         var eventUids = userMembership.Select(m => m.EventUid).ToArray();
         var allEvents = await dbContext.Events.AsNoTracking().Where(e => eventUids.Contains(e.Uid)).ToArrayAsync();
 
-        var allEventMemberships = await dbContext.Memberships.AsNoTracking().Where(m => eventUids.Contains(m.EventUid)).ToArrayAsync();
+        var allEventMemberships = await dbContext.Memberships.AsNoTracking().Where(m => eventUids.Contains(m.EventUid))
+            .ToArrayAsync();
         var membershipLookup = allEventMemberships.ToLookup(a => a.EventUid);
 
         List<SecretSantaEvent> events = new();
@@ -31,7 +33,8 @@ public class Persistence
         {
             var members = membershipLookup[persistedSantaEvent.Uid].ToArray();
             var mappedMembers = members.Select(m => new SecretSantaMember(m.Name, m.TelegramLogin)).ToArray();
-            var loginMapping = mappedMembers.ToDictionary(m => m.TelegramLogin, m => m, StringComparer.OrdinalIgnoreCase);
+            var loginMapping =
+                mappedMembers.ToDictionary(m => m.TelegramLogin, m => m, StringComparer.OrdinalIgnoreCase);
             var opponentMapping = members.ToDictionary(m => loginMapping[m.TelegramLogin],
                 m => loginMapping[m.OpponentTelegramLogin]);
             var metadata = persistedSantaEvent.Metadata;
@@ -66,8 +69,7 @@ public class Persistence
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        await dbContext.Events.AddAsync(new SqliteDbContext.PersistedSantaEvent()
-        {
+        await dbContext.Events.AddAsync(new SqliteDbContext.PersistedSantaEvent() {
             Name = santaEvent.Name,
             Uid = santaEvent.Uid,
             Metadata = santaEvent.Metadata.Content,
@@ -78,8 +80,7 @@ public class Persistence
         var opponents = santaEvent.Opponents;
         foreach (var member in santaEvent.TelegramUsers)
         {
-            await dbContext.Memberships.AddAsync(new SqliteDbContext.PersistedSantaEventMembership()
-            {
+            await dbContext.Memberships.AddAsync(new SqliteDbContext.PersistedSantaEventMembership() {
                 Name = member.Name,
                 EventUid = santaEvent.Uid,
                 TelegramLogin = member.TelegramLogin,
@@ -88,5 +89,19 @@ public class Persistence
         }
 
         await dbContext.SaveChangesAsync();
+    }
+
+    public async Task<string[]> GetAutocompleteFor(string ownerLogin, string? newMemberLogin)
+    {
+        newMemberLogin ??= string.Empty;
+        await using var ctx = await _dbContextFactory.CreateDbContextAsync();
+
+        return await ctx.Memberships
+            .Where(x => x.TelegramLogin.ToLower().Contains(newMemberLogin.ToLower()) && x.Event.OwnerId == ownerLogin)
+            .Select(x => x.TelegramLogin)
+            .Distinct()
+            .OrderBy(x => x)
+            .Take(10)
+            .ToArrayAsync();
     }
 }
