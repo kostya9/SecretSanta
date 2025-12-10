@@ -1,12 +1,17 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
-<div class="flex flex-col min-h-screen h-full min-w-screen w-full">
-    <div class="h-36 w-screen flex justify-evenly items-center pt-2 pb-2 bg-red-400">
-        <img class="h-full object-scale-down" src="img/prizes.png"/>
-        <NavLink href="/"><h1 class="text-5xl align-baseline">Secret Santa</h1></NavLink>
-        <img class="h-full object-scale-down" src="img/santa-skating.png"/>
-    </div>
-    <div class="min-h-screen h-full bg-red-100">
+<div>
+    <header class="site-header">
+        <div class="site-header-inner">
+            <img src="img/prizes.png" alt="Gifts"/>
+            <NavLink href="/">
+                <span class="site-title">Secret Santa</span>
+            </NavLink>
+            <img src="img/santa-skating.png" alt="Santa"/>
+        </div>
+    </header>
+
+    <main>
         @Body
-    </div>
+    </main>
 </div>

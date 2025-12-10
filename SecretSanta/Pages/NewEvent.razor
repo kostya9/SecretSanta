@@ -1,4 +1,4 @@
-﻿@page "/NewEvent"
+@page "/NewEvent"
 @using SecretSanta.Domain
 @using SecretSanta.Domain.Data
 @using SecretSanta.Domain.State
@@ -10,136 +10,186 @@
 @inject Persistence Persistence
 @inject TelegramAuth Auth
 
-<div class="text-center w-full">
-    <h3 class="text-2xl font-bold">New Santa Event</h3>
-</div>
+<div class="animate-in">
+    <h2 class="page-title">Create New Event</h2>
 
-<div class="my-5">
-    <label>
-        How do you want to call this event?
-    </label>
-    <input type="text" class="p-1 box-border rounded outline-none w-48 block" @bind-value="EventName" @bind-value:event="oninput" placeholder="Event name"/>
-</div>
+    <!-- Event Details -->
+    <div class="section-box" style="margin-bottom: 1.5rem;">
+        <h3 class="section-title">Event Details</h3>
 
-<div class="my-5">
-    <label>
-        How do you want us to call you?
-    </label>
-    <input type="text" class="p-1 box-border rounded outline-none w-48 block" @bind-value="LoggedInName" @bind-value:event="oninput" placeholder="Your name"/>
-</div>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+                <label class="form-label">Event Name</label>
+                <input type="text"
+                       class="input"
+                       @bind-value="EventName"
+                       @bind-value:event="oninput"
+                       placeholder="e.g., Family Christmas 2024"/>
+            </div>
 
-<div class="flex flex-wrap flex-1 p-3 justify-center">
-    <div class="bg-red-50 rounded w-96 p-3 m-3">
-        <div class="font-bold">You</div>
-        <div>Name: @(LoggedInName ?? string.Empty)</div>
-        <div>Telegram Username: @Auth.Login.Login</div>
-    </div>
-    
-    @foreach (var member in _members)
-    {
-        <div class="bg-red-50 rounded w-96 p-3 m-3">
-            <div>Name: @member.Name</div>
-            <div>Telegram Username: <a class="text-blue-700 underline" target="_blank" href="https://t.me/@member.TelegramLogin">@member.TelegramLogin</a></div>
-            <Button OnClick="() => RemoveMember(member)">Remove</Button>
+            <div>
+                <label class="form-label">Your Display Name</label>
+                <input type="text"
+                       class="input"
+                       @bind-value="LoggedInName"
+                       @bind-value:event="oninput"
+                       placeholder="How others will see you"/>
+            </div>
         </div>
-    }
-</div>
-
-<div class="space-y-5 bg-red-200 p-5 max-w-xs">
-    <h4 class="font-bold italic">New Member</h4>
-    
-    @if (_errorText != null)
-    {
-        <span class="text-red-800 font-bold">@_errorText</span>
-    }
-    
-    <div>
-        <label>
-            Name
-        </label>
-        <input type="text" class="p-1 box-border rounded outline-none block" @bind-value="NewMemberName" @bind-value:event="oninput"/>
     </div>
-    <div>
-        <label>
-            Telegram Username
-        </label>
-        <input list="tg-login" type="text" class="p-1 box-border rounded outline-none block" @bind="NewMemberLogin" @oninput="UpdateAutocomplete"/>
-        <datalist id="tg-login">
-            @foreach (var login in AutocompleteLogins)
+
+    <!-- Participants -->
+    <div class="section-box" style="margin-bottom: 1.5rem;">
+        <h3 class="section-title">Participants</h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem;">
+            <!-- You card -->
+            <div class="member-card member-card-highlight">
+                <span class="badge badge-you" style="margin-bottom: 0.5rem; display: inline-block;">You</span>
+                <p class="member-name">@(LoggedInName ?? "Your name")</p>
+                <span class="member-username">@@@Auth.Login.Login</span>
+            </div>
+
+            @foreach (var member in _members)
             {
-                <option>@login</option>
+                <div class="member-card" style="position: relative;">
+                    <p class="member-name">@member.Name</p>
+                    <a class="member-username" target="_blank" href="https://t.me/@member.TelegramLogin">
+                        @@@member.TelegramLogin
+                    </a>
+                    <button @onclick="() => RemoveMember(member)"
+                            style="position: absolute; top: 0.5rem; right: 0.5rem; background: none; border: none; cursor: pointer; color: var(--color-red); font-size: 1.25rem; line-height: 1; padding: 0.25rem;">
+                        ×
+                    </button>
+                </div>
             }
-        </datalist>
-        
+        </div>
+
+        <!-- Add member form -->
+        <div class="card">
+            <h4 style="font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700; margin: 0 0 1rem 0;">Add Participant</h4>
+
+            @if (_errorText != null)
+            {
+                <p class="text-error" style="margin-bottom: 1rem; padding: 0.75rem; background: rgba(197, 75, 75, 0.1); border-radius: 8px;">
+                    @_errorText
+                </p>
+            }
+
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <input type="text"
+                           class="input"
+                           @bind-value="NewMemberName"
+                           @bind-value:event="oninput"
+                           placeholder="Name"/>
+                    <input list="tg-login"
+                           type="text"
+                           class="input"
+                           @bind="NewMemberLogin"
+                           @oninput="UpdateAutocomplete"
+                           placeholder="Telegram username"/>
+                    <datalist id="tg-login">
+                        @foreach (var login in AutocompleteLogins)
+                        {
+                            <option>@login</option>
+                        }
+                    </datalist>
+                </div>
+                <Button OnClick="Add" Disabled="Disabled" Variant="ButtonVariant.Secondary">Add</Button>
+            </div>
+        </div>
     </div>
-    <Button OnClick="Add" Disabled="Disabled">
-        Add
-    </Button>
-</div>
 
-<div class="my-5 bg-red-50 p-3">
-    @if(!_enabledPrice)
+    <!-- Price Section -->
+    <div class="section-box" style="margin-bottom: 1.5rem;">
+        <h3 class="section-title">Gift Budget (Optional)</h3>
+
+        @if(!_enabledPrice)
+        {
+            <Button OnClick="(_) => SetPriceEnabled(true)" Variant="ButtonVariant.Secondary">
+                Set a recommended price limit
+            </Button>
+        }
+        else
+        {
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label class="form-label">Maximum Price</label>
+                        <input type="number"
+                               min="1"
+                               class="input"
+                               @bind-value="Price"
+                               @bind-value:event="oninput"
+                               placeholder="Amount"/>
+                    </div>
+                    <div>
+                        <label class="form-label">Currency</label>
+                        <input type="text"
+                               class="input"
+                               @bind-value="Currency"
+                               @bind-value:event="oninput"
+                               placeholder="e.g., USD, EUR"/>
+                    </div>
+                </div>
+                <Button OnClick="(_) => SetPriceEnabled(false)" Variant="ButtonVariant.Secondary">
+                    Remove price limit
+                </Button>
+            </div>
+        }
+    </div>
+
+    <!-- Save -->
+    <div style="display: flex; justify-content: center;">
+        <Button Size="ButtonSize.Large" OnClick="Save" Disabled="!CanSave">Create Event</Button>
+    </div>
+
+    @if (!CanSave && (_members.Count > 0 || !string.IsNullOrWhiteSpace(EventName)))
     {
-        <Button OnClick="(_) => SetPriceEnabled(true)" Class="mx-auto block my-2">
-            Add Price
-        </Button>
+        <p class="text-muted" style="text-align: center; margin-top: 1rem; font-size: 0.9rem;">
+            @if (_members.Count < 1)
+            {
+                <span>Add at least one other participant to create the event.</span>
+            }
+            else if (string.IsNullOrWhiteSpace(EventName))
+            {
+                <span>Please enter an event name.</span>
+            }
+            else if (string.IsNullOrWhiteSpace(LoggedInName))
+            {
+                <span>Please enter your display name.</span>
+            }
+        </p>
     }
-    else
-    {
-        <Button OnClick="(_) => SetPriceEnabled(false)" Class="mx-auto block my-2">
-            Remove Price
-        </Button>
-        
-        <label class="">
-        Recommended Maximum price?
-        </label>
-        <br />
-
-        <input type="number" min="1" class="block p-1 box-border rounded outline-none my-2" @bind-value="Price" @bind-value:event="oninput" placeholder="Recommended Max Price"/>
-
-        <input type="text" class="block p-1 box-border rounded outline-none my-2" @bind-value="Currency" @bind-value:event="oninput" placeholder="Currency"/>
-    }
-</div>
-
-<div class="flex justify-center my-5">
-    <Button Size="ButtonSize.Large" OnClick="Save" Disabled="!CanSave">Save</Button>
 </div>
 
 @code {
     private readonly List<SecretSantaMember> _members = new();
     private string? _errorText;
-
     private bool _enabledPrice;
 
-    private void SetPriceEnabled(bool value)
-    {
-        _enabledPrice = value;
-    }
+    private void SetPriceEnabled(bool value) => _enabledPrice = value;
 
-    private void RemoveMember(SecretSantaMember member)
-    {
-        _members.Remove(member);
-    }
+    private void RemoveMember(SecretSantaMember member) => _members.Remove(member);
 
     private void Add()
     {
-        if (Disabled)
-            return;
+        if (Disabled) return;
 
         if (_members.Any(m => m.Name.Equals(NewMemberName, StringComparison.InvariantCultureIgnoreCase)))
         {
-            _errorText = "Member with such a name already exists.";
+            _errorText = "A participant with this name already exists.";
             return;
         }
 
         if (_members.Any(m => m.TelegramLogin.Equals(NewMemberLogin, StringComparison.InvariantCultureIgnoreCase)))
         {
-            _errorText = "Member with such a login already exists.";
+            _errorText = "A participant with this Telegram username already exists.";
             return;
         }
 
         _members.Add(new SecretSantaMember(NewMemberName!.Trim(), NewMemberLogin!.Trim().TrimStart('@')));
-
         NewMemberName = null;
         NewMemberLogin = null;
         _errorText = null;
@@ -147,8 +197,7 @@
 
     private async Task Save()
     {
-        if (!CanSave)
-            return;
+        if (!CanSave) return;
 
         var metadataNode = JsonObject.Parse("{}")!;
 
@@ -171,37 +220,24 @@
         await Persistence.SaveEvent(santaEvent);
     }
 
-
     bool Disabled => string.IsNullOrWhiteSpace(NewMemberName) || string.IsNullOrWhiteSpace(NewMemberLogin);
 
-    bool CanSave 
-    { 
+    bool CanSave
+    {
         get
         {
             var isValid = _members.Count >= 1 && !string.IsNullOrWhiteSpace(EventName) && !string.IsNullOrWhiteSpace(LoggedInName);
-
-            if (_enabledPrice)
-            {
-                if(!Price.HasValue || Price < 1 || string.IsNullOrWhiteSpace(Currency))
-                {
-                    isValid = false;
-                }
-            }
-
+            if (_enabledPrice && (!Price.HasValue || Price < 1 || string.IsNullOrWhiteSpace(Currency)))
+                isValid = false;
             return isValid;
         }
     }
 
     public string? NewMemberName { get; set; }
-
     public string? NewMemberLogin { get; set; }
-
     public string? EventName { get; set; }
-
     public string? LoggedInName { get; set; }
-
     public int? Price { get; set; }
-
     public string? Currency { get; set; }
 
     private async Task UpdateAutocomplete(ChangeEventArgs eventArgs)
@@ -211,5 +247,4 @@
     }
 
     public string[] AutocompleteLogins { get; set; } = Array.Empty<string>();
-
 }

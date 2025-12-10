@@ -1,4 +1,4 @@
-﻿@using Microsoft.Extensions.Hosting
+@using Microsoft.Extensions.Hosting
 @using Newtonsoft.Json.Linq
 @using SecretSanta.Domain
 @using SecretSanta.Domain.State
@@ -16,29 +16,37 @@
 
 @if (Environment.IsDevelopment())
 {
-    <h3>Mock login as</h3>
-    <input @bind="MockValue">
-    <button @onclick="MockLogin">Go</button>
+    <div class="section-box animate-in" style="text-align: center;">
+        <h3 class="section-title">Development Login</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; align-items: center;">
+            <input class="input" style="max-width: 280px;" @bind="MockValue" placeholder="Telegram username">
+            <Button OnClick="MockLogin">Log In</Button>
+        </div>
+    </div>
 }
 else
 {
-    <div class="text-center">
-        <h3 class="text-2xl font-bold">@Localizer.GetString("LoginWithTelegram")</h3>
-    </div>
-    
-    <div class="flex justify-center m-5">
-        @if(_showLoginButton) 
-        {
-            <script id="login" suppress-error="BL9992" src="https://telegram.org/js/telegram-widget.js?14" data-telegram-login="secret_santa_presents_bot" data-size="large" data-onauth="onTelegramAuth(user)"></script>
-            <script suppress-error="BL9992" type="text/javascript">
-              window.onTelegramAuth = (user) => {
-                  var ref = window.refs.updateTelegramLogin
-                  ref.invokeMethodAsync('LoginWithTelegram', user);
-                  var button = document.getElementById('telegram-login-secret_santa_presents_bot');
-                  button.parentElement.removeChild(button);
-                }
-            </script>
-        }
+    <div class="section-box animate-in" style="text-align: center;">
+        <div style="margin-bottom: 1.5rem;">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎅</div>
+            <h3 class="section-title" style="margin-bottom: 0.5rem;">@Localizer.GetString("LoginWithTelegram")</h3>
+            <p class="text-muted">Sign in to create or join Secret Santa events</p>
+        </div>
+
+        <div style="display: flex; justify-content: center;">
+            @if(_showLoginButton)
+            {
+                <script id="login" suppress-error="BL9992" src="https://telegram.org/js/telegram-widget.js?14" data-telegram-login="secret_santa_presents_bot" data-size="large" data-onauth="onTelegramAuth(user)"></script>
+                <script suppress-error="BL9992" type="text/javascript">
+                  window.onTelegramAuth = (user) => {
+                      var ref = window.refs.updateTelegramLogin
+                      ref.invokeMethodAsync('LoginWithTelegram', user);
+                      var button = document.getElementById('telegram-login-secret_santa_presents_bot');
+                      button.parentElement.removeChild(button);
+                    }
+                </script>
+            }
+        </div>
     </div>
 }
 
@@ -49,7 +57,7 @@ else
     private TelegramLoginInterop? _telegramLoginInterop;
 
     string _jsUpdateLoginRefId = "updateTelegramLogin";
-    
+
     string? MockValue { get; set; }
 
     bool _showLoginButton;
@@ -79,7 +87,7 @@ else
             MockValue = "burningleg";
             await MockLogin();
         }
-        
+
         await base.OnInitializedAsync();
     }
 

@@ -1,7 +1,6 @@
-﻿@tailwind base;
-
+@tailwind base;
 @tailwind components;
-
 @tailwind utilities;
 
+/* Custom styles come AFTER Tailwind base reset */
 @import './site.css';

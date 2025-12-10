@@ -1,4 +1,7 @@
-﻿<button type="button" class="shadow-md bg-red-300 rounded px-5 disabled:bg-gray-300 disabled:text-red-400 @SizeClass @Class" disabled="@Disabled" @onclick="OnClick">
+<button type="button"
+        class="btn @VariantClass @SizeClass @Class"
+        disabled="@Disabled"
+        @onclick="OnClick">
     @ChildContent
 </button>
 
@@ -16,7 +19,11 @@
     public ButtonSize Size { get; set; } = ButtonSize.Normal;
 
     [Parameter]
+    public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
+
+    [Parameter]
     public string Class { get; set; } = "";
 
-    private string SizeClass => Size == ButtonSize.Large ? "w-96" : string.Empty;
+    private string VariantClass => Variant == ButtonVariant.Secondary ? "btn-secondary" : "btn-primary";
+    private string SizeClass => Size == ButtonSize.Large ? "btn-lg btn-full" : string.Empty;
 }

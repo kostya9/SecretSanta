@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "WebSearch",
+      "Bash(dotnet build:*)",
+      "Skill(frontend-design:frontend-design)",
+      "WebFetch(domain:localhost)",
+      "WebFetch(domain:core.telegram.org)"
+    ]
+  }
+}

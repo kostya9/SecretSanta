@@ -9,7 +9,7 @@
 <LayoutView Layout="@typeof(MainLayout)">
     <Router AppAssembly="@typeof(Program).Assembly">
         <Found Context="routeData">
-            <div class="container md:w-6/12 w-full mx-auto p-10">
+            <div class="main-container">
                 @if (Auth.IsLoggedIn)
                 {
                     <CascadingValue Value="Auth.Login!">
@@ -21,35 +21,58 @@
                     <LoginWithTelegram/>
                 }
 
-                <div class="space-y-1 border-black mt-10">
-                    @if (Auth.IsLoggedIn)
-                    {
-                        <div>
-                            <h2 class="text-xs">@Localizer.GetString("YouAreLoggedIn") <i>@@@Auth.Login.Login</i>. <a class="text-blue-500 underline cursor-pointer" @onclick="LogOut">@Localizer.GetString("LogOut")</a> </h2>
+                <footer class="site-footer">
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        @if (Auth.IsLoggedIn)
+                        {
+                            <p class="footer-text">
+                                @Localizer.GetString("YouAreLoggedIn")
+                                <span class="footer-user">@@@Auth.Login.Login</span>
+                                ·
+                                <a class="link" style="cursor: pointer;" @onclick="LogOut">
+                                    @Localizer.GetString("LogOut")
+                                </a>
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="footer-text">
+                                @Localizer.GetString("TryTelegramBot")
+                                <a class="link" target="_blank" href="https://t.me/secret_santa_presents_bot">
+                                    @@secret_santa_presents_bot
+                                </a>
+                            </p>
+                        }
+
+                        <p class="footer-text">
+                            @Localizer.GetString("AppIsOpenSource")
+                            <a class="link" href="https://github.com/kostya9/SecretSanta" target="_blank">GitHub</a>
+                        </p>
+
+                        <div style="display: flex; align-items: center; gap: 0.75rem; padding-top: 0.5rem;">
+                            <span class="footer-text" style="font-size: 0.75rem;">Language:</span>
+                            <button class="lang-btn" @onclick='() => SetLocalization("uk")'>
+                                <img src="img/ua-icon.png" alt="Ukrainian"/>
+                            </button>
+                            <button class="lang-btn" @onclick='() => SetLocalization("en")'>
+                                <img src="img/en-icon.png" alt="English"/>
+                            </button>
                         </div>
-                    }
-                    else
-                    {
-                        <div>
-                            <h2 class="text-xs">@Localizer.GetString("TryTelegramBot") <a target="_blank" class="text-blue-500 underline cursor-pointer" href="https://t.me/secret_santa_presents_bot">@@secret_santa_presents_bot</a>.</h2>
-                        </div>
-                    }
-                    <div>
-                        <h2 class="text-xs">
-                            @Localizer.GetString("AppIsOpenSource") <a class="text-blue-500 underline cursor-pointer" href="https://github.com/kostya9/SecretSanta" target="_blank">GitHub</a>
-                        </h2>
                     </div>
-                    <div>
-                        <div class="flex flex-row space-x-2">
-                            <img class="w-10 cursor-pointer" src="img/ua-icon.png" alt="UA language" @onclick='() => SetLocalization("uk")'/>
-                            <img class="w-10 cursor-pointer" src="img/en-icon.png" alt="EN language" @onclick='() => SetLocalization("en")'/>
-                        </div>
-                    </div>
-                </div>
+                </footer>
             </div>
         </Found>
         <NotFound>
-            <p>Sorry, there's nothing at this address.</p>
+            <div class="main-container">
+                <div class="section-box" style="text-align: center; padding: 3rem 1.5rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎄</div>
+                    <h2 class="page-title">Page Not Found</h2>
+                    <p class="text-muted">Sorry, there's nothing at this address.</p>
+                    <div style="margin-top: 1.5rem;">
+                        <NavLink href="/" class="btn btn-primary">Go Home</NavLink>
+                    </div>
+                </div>
+            </div>
         </NotFound>
     </Router>
 </LayoutView>
@@ -59,7 +82,6 @@
     protected override void OnInitialized()
     {
         Auth.AuthChanged += OnAuthChanged;
-
         base.OnInitialized();
     }
 
